@@ -12,6 +12,8 @@ typeset -gAH ZPLG_REGISTERED_STATES
 typeset -gAH ZPLG_SNIPPETS
 # Reports, per plugin
 typeset -gAH ZPLG_REPORTS
+# Order of loaded items
+typeset -gaH ZPLG_ORDER
 
 #
 # Common needed values
@@ -73,6 +75,7 @@ typeset -gAH ZPLG_BACKUP_FUNCTIONS
 typeset -gAH ZPLG_BACKUP_ALIASES
 typeset -ga ZPLG_STRESS_TEST_OPTIONS
 ZPLG_STRESS_TEST_OPTIONS=( "NO_SHORT_LOOPS" "IGNORE_BRACES" "IGNORE_CLOSE_BRACES" "SH_GLOB" "CSH_JUNKIE_QUOTES" "NO_MULTI_FUNC_DEF" )
+ZPLG_STATE_FILE="$ZPLG_HOME/state"
 
 #
 # All to the users - simulate OMZ directory structure (1/3)
@@ -1843,6 +1846,10 @@ ZPLG_ZLE_HOOKS_LIST=(
     # Full or light load?
     [ "$mode" = "light" ] && ZPLG_REGISTERED_STATES[$uspl2]="1" || ZPLG_REGISTERED_STATES[$uspl2]="2"
 
+    local oidx="${ZPLG_ORDER[(i)$uspl2]}"
+    ZPLG_ORDER[$oidx]=()
+    ZPLG_ORDER+=("${(q)mode} ${(q)uspl2}")
+
     ZPLG_REPORTS[$uspl2]=""
     ZPLG_FUNCTIONS_BEFORE[$uspl2]=""
     ZPLG_FUNCTIONS_AFTER[$uspl2]=""
@@ -1862,6 +1869,8 @@ ZPLG_ZLE_HOOKS_LIST=(
 -zplg-unregister-plugin() {
     -zplg-any-to-user-plugin "$1" "$2"
     local uspl2="${reply[-2]}/${reply[-1]}"
+    local mode
+    [[ "${ZPLG_REGISTERED_STATES[$uspl2]}" = 1 ]] && mode="light" || mode="load"
 
     # If not found, idx will be length+1
     local idx="${ZPLG_REGISTERED_PLUGINS[(i)$uspl2]}"
@@ -2652,6 +2661,10 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     ZPLG_SNIPPETS[$url]="$filename"
 
+    local oidx="${ZPLG_ORDER[(i)$url]}"
+    ZPLG_ORDER[$oidx]=()
+    ZPLG_ORDER+=("snippet ${(q)url}")
+
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
         url="${url/\/blob\///raw/}"
@@ -2803,6 +2816,35 @@ ZPLG_ZLE_HOOKS_LIST=(
     print "Compiled plugins: ${infoc}$count${reset_color}"
 }
 
+-zplg-save-state() {
+    local infoc="${ZPLG_COL[info]}"
+    local out=()
+
+    local cur state mode pre
+    for cur in "${ZPLG_ORDER[@]}"; do
+        mode="${cur%% *}" cur="${cur#* }"
+        state="${ZPLG_REGISTERED_STATES[$cur]}"
+        pre="$ZPLG_NAME"
+        [[ "$state" != 0 ]] || pre="#$pre"
+
+        out+=("$pre $mode $cur")
+    done
+
+    out="${(j.\n.)out[@]}"
+
+    if [[ "$1" = - ]]; then
+        echo "$out"
+        return
+    fi
+
+    if [[ -f "$ZPLG_STATE_FILE" ]]; then
+        print "Backup of original state file: ${infoc}$ZPLG_STATE_FILE.last${reset_color}"
+        cat "$ZPLG_STATE_FILE" > "$ZPLG_STATE_FILE.last"
+    fi
+
+    print "Saving state to ${infoc}$ZPLG_STATE_FILE${reset_color}"
+    echo "$out" > "$ZPLG_STATE_FILE"
+}
 
 # Gets list of compiled plugins
 -zplg-compiled() {
@@ -3400,6 +3442,9 @@ zplugin() {
        (stress)
            -zplg-stress "$2" "$3"
            ;;
+       (save)
+           -zplg-save-state "$2"
+           ;;
        (-h|--help|help|"")
            print "${ZPLG_COL[p]}Usage${ZPLG_COL[rst]}:
 -h|--help|help           - usage information
@@ -3410,6 +3455,7 @@ load ${ZPLG_COL[pname]}{plugin-name}${ZPLG_COL[rst]}       - load plugin
 light ${ZPLG_COL[pname]}{plugin-name}${ZPLG_COL[rst]}      - light plugin load, without reporting
 unload ${ZPLG_COL[pname]}{plugin-name}${ZPLG_COL[rst]}     - unload plugin
 snippet [-f] ${ZPLG_COL[pname]}{url}${ZPLG_COL[rst]}       - source local or remote file (-f: force - don't use cache)
+save                     - save the current list of snippets and plugins
 update ${ZPLG_COL[pname]}{plugin-name}${ZPLG_COL[rst]}     - update plugin (Git)
 update-all               - update all plugins (Git)
 status ${ZPLG_COL[pname]}{plugin-name}${ZPLG_COL[rst]}     - status for plugin (Git)
