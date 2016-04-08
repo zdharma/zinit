@@ -2857,9 +2857,10 @@ ZPLG_ZLE_HOOKS_LIST=(
     local cur state mode pre
     for cur in "${ZPLG_ORDER[@]}"; do
         # space separated: $what $mode $name
-        # hack off the type, it's only useful to make removals less, well, hacky.
-        cur="${cur#* }"
-        mode="${cur%% *}" cur="${cur#* }"
+        # since we quote on the way on, this should be fine to word split
+        cur=($=cur)
+        mode="${cur[@]:1:1}"
+        cur="${cur[@]:2:1}"
 
         state="${ZPLG_REGISTERED_STATES[$cur]}"
         pre="$ZPLG_NAME"
