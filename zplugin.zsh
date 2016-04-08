@@ -1327,6 +1327,28 @@ ZPLG_ZLE_HOOKS_LIST=(
     return 0
 }
 
+# Removes a given loadable plugin or snipet from the order stack.
+# Really only used during load of such a thing as dupes would not be pleasant.
+-zplg-remove-from-order-stack() {
+    local what="$1" name="$2" mode="$3"  # mode is not required at this time.
+
+    # Remove existing first since we keep unloaded ones around (commented).
+    # All that we care about here is that the type/what is the same, since it's
+    # exclusive.
+    local pat="${what} * ${name}"
+    local oidx="${ZPLG_ORDER[(i)$pat]}"
+    ZPLG_ORDER[$oidx]=()
+}
+
+# Appends a given loadable plugin or snippet to the order stack.
+# First thing it does is remove any items of the same type and name as the one
+# being added to avoid dupes.
+-zplg-append-to-order-stack() {
+    local what="$1" name="$2" mode="$3"
+    -zplg-remove-from-order-stack "$@"  # cheater
+    ZPLG_ORDER+=("$what $mode $name")
+}
+
 # Will take uspl, uspl2, or just plugin name,
 # and return colored text
 -zplg-any-colorify-as-uspl2() {
@@ -1841,22 +1863,19 @@ ZPLG_ZLE_HOOKS_LIST=(
     if ! -zplg-exists "$user" "$plugin"; then
         ZPLG_REGISTERED_PLUGINS+=( "$uspl2" )
     elif [ -n "${opts[(r)-f]}" ]; then
-        # Allow overwrite-load, however warn about it
-        print "Warning: plugin \`$uspl2' already registered, will overwrite-load."
+        # Allow reload, however warn about it
+        print "Warning: plugin \`$uspl2' already registered; forcing reload."
         ret=1
     else
         # We're already loaded, and we're not being forced, so it's all good.
-        print "Info: plugin \`$uspl2' already registered. If you mean to force reloading it, try \`-f' to force loading."
+        print "Warning: plugin \`$uspl2' already registered; skipping (use '-f' to force a reload)."
         return 0
     fi
 
     # Full or light load?
     [ "$mode" = "light" ] && ZPLG_REGISTERED_STATES[$uspl2]="1" || ZPLG_REGISTERED_STATES[$uspl2]="2"
 
-    local cur="${mode} ${uspl2}"
-    local oidx="${ZPLG_ORDER[(i)$cur]}"
-    ZPLG_ORDER[$oidx]=()
-    ZPLG_ORDER+=("$cur")
+    -zplg-append-to-order-stack "plugin" "$mode" "$uspl2"
 
     ZPLG_REPORTS[$uspl2]=""
     ZPLG_FUNCTIONS_BEFORE[$uspl2]=""
@@ -2669,9 +2688,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     ZPLG_SNIPPETS[$url]="$filename"
 
-    local oidx="${ZPLG_ORDER[(i)$url]}"
-    ZPLG_ORDER[$oidx]=()
-    ZPLG_ORDER+=("snippet ${(q)url}")
+    -zplg-append-to-order-stack "snippet" "snippet" "$url"
 
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
@@ -2830,7 +2847,9 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     local cur state mode pre
     for cur in "${ZPLG_ORDER[@]}"; do
-        mode="${cur%% *}" cur="${cur#* }"
+        # space separated: $what $mode $name
+        mode="${cur%% * *}" cur="${cur#* * }"
+
         state="${ZPLG_REGISTERED_STATES[$cur]}"
         pre="$ZPLG_NAME"
         [[ "$state" != 0 ]] || pre="#$pre"
