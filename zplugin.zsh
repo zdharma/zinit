@@ -1852,12 +1852,14 @@ ZPLG_ZLE_HOOKS_LIST=(
 
 # TODO detect second autoload?
 -zplg-register-plugin() {
-    local -a opts=()
-    zparseopts -a opts -K -D f
+    local -a opts=("${opts[@]}")
+    zparseopts -a opts -D -K f
 
-    local mode="$3"
-    -zplg-any-to-user-plugin "$1" "$2"
+    local mode="$1"
+    -zplg-any-to-user-plugin "$2" "$3"
     local user="${reply[-2]}" plugin="${reply[-1]}" uspl2="${reply[-2]}/${reply[-1]}"
+    set -- "$mode" "$user" "$plugin" "${@:4}"
+
     integer ret=0
 
     if ! -zplg-exists "$user" "$plugin"; then
@@ -1906,7 +1908,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 }
 
 -zplg-load-plugin() {
-    local user="$1" plugin="$2" mode="$3"
+    local mode="$1" user="$2" plugin="$3"
     ZPLG_CUR_USER="$user"
     ZPLG_CUR_PLUGIN="$plugin"
     ZPLG_CUR_USPL="${user}---${plugin}"
@@ -2332,15 +2334,20 @@ ZPLG_ZLE_HOOKS_LIST=(
 
 # $1 - plugin name, possibly github path
 -zplg-load () {
-    local mode="$3"
-    -zplg-any-to-user-plugin "$1" "$2"
-    local user="${reply[-2]}" plugin="${reply[-1]}"
+    local mode="$1"; shift
+    local -a opts=()
+    zparseopts -a opts -D f
+    set -- "$mode" "$@"
 
-    -zplg-register-plugin "$user" "$plugin" "$mode"
+    -zplg-any-to-user-plugin "$2" "$3"
+    local user="${reply[-2]}" plugin="${reply[-1]}"
+    set -- "$mode" "$user" "$plugin" "${@:4}"
+
+    -zplg-register-plugin "$@"
     if ! -zplg-setup-plugin-dir "$user" "$plugin"; then
         -zplg-unregister-plugin "$user" "$plugin"
     else
-        -zplg-load-plugin "$user" "$plugin" "$mode"
+        -zplg-load-plugin "$@"
     fi
 }
 
@@ -3269,75 +3276,74 @@ zplugin() {
 
     case "$1" in
        (man)
-           man "$ZPLG_DIR/doc/zplugin.1"
+           man "$ZPLG_DIR/doc/zplugin.1" "${@:2}"
            ;;
        (zstatus)
-           -zplg-show-zstatus
+           -zplg-show-zstatus "${@:2}"
            ;;
        (self-update)
-           -zplg-self-update
+           -zplg-self-update "${@:2}"
            ;;
-       (load)
-           if [[ -z "$2" && -z "$3" ]]; then
+       (load|light)
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
-           # Load plugin given in uspl2 or "user plugin" format
-           # Possibly clone from github, and install completions
-           -zplg-load "$2" "$3" "load"
-           ;;
-       (light)
-           if [[ -z "$2" && -z "$3" ]]; then
-               print "Argument needed, try help"
-               return 1
-           fi
-           # This is light load, without tracking, only with
-           # clean FPATH (autoload is still being shadowed)
-           -zplg-load "$2" "$3" "light"
+
+           #
+           # load:
+           #    Load plugin given in uspl2 or "user plugin" format
+           #    Possibly clone from github, and install completions
+           #
+           # light:
+           #    This is light load, without tracking, only with
+           #    clean FPATH (autoload is still being shadowed)
+           #
+           -zplg-load "$@"
            ;;
        (unload)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
            # Unload given plugin. Cloned directory remains intact
            # so as are completions
-           -zplg-unload "$2" "$3"
+           -zplg-unload "${@:2}"
            ;;
        (snippet)
-           -zplg-load-snippet "$2" "$3"
+           -zplg-load-snippet "${@:2}"
            ;;
        (update)
-           -zplg-update-or-status "update" "$2" "$3"
+           -zplg-update-or-status "$@"
            ;;
        (update-all)
-           -zplg-update-or-status-all "update"
+           -zplg-update-or-status-all "update" "${@:2}"
            ;;
        (status)
-           -zplg-update-or-status "status" "$2" "$3"
+           -zplg-update-or-status "$@"
            ;;
        (status-all)
-           -zplg-update-or-status-all "status"
+           -zplg-update-or-status-all "status" "${@:2}"
            ;;
        (report)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
            # Display report of given plugin
-           -zplg-show-report "$2" "$3"
+           -zplg-show-report "${@:2}"
            ;;
        (all-reports)
            # Display reports of all plugins
-           -zplg-show-all-reports
+           -zplg-show-all-reports "${@:2}"
            ;;
        (loaded|list)
            # Show list of loaded plugins
-           -zplg-show-registered-plugins "$2"
+           -zplg-show-registered-plugins "${@:2}"
            ;;
        (clist|completions)
            # Show installed, enabled or disabled, completions
-           -zplg-show-completions
+           -zplg-show-completions "${@:2}"
            ;;
        (cdisable)
            if [[ -z "$2" ]]; then
@@ -3370,7 +3376,7 @@ zplugin() {
            fi
            ;;
        (creinstall)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
@@ -3382,7 +3388,7 @@ zplugin() {
            compinit
            ;;
        (cuninstall)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
@@ -3398,79 +3404,79 @@ zplugin() {
        (compinit)
            # Runs compinit in a way that ensures
            # reload of plugins' completions
-           -zplg-compinit
+           -zplg-compinit "${@:2}"
            ;;
        (dstart|dtrace)
-           -zplg-debug-start
+           -zplg-debug-start "${@:2}"
            ;;
        (dstop)
-           -zplg-debug-stop
+           -zplg-debug-stop "${@:2}"
            ;;
        (dreport)
-           -zplg-show-debug-report
+           -zplg-show-debug-report "${@:2}"
            ;;
        (dclear)
-           -zplg-clear-debug-report
+           -zplg-clear-debug-report "${@:2}"
            ;;
        (dunload)
-           -zplg-debug-unload
+           -zplg-debug-unload "${@:2}"
            ;;
        (compile)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
-           -zplg-compile-plugin "$2" "$3"
+           -zplg-compile-plugin "${@:2}"
            ;;
        (compile-all)
-           -zplg-compile-uncompile-all "1"
+           -zplg-compile-uncompile-all "1" "${@:2}"
            ;;
        (uncompile)
-           if [[ -z "$2" && -z "$3" ]]; then
+           if [[ -z "$2$3" ]]; then
                print "Argument needed, try help"
                return 1
            fi
-           -zplg-uncompile-plugin "$2" "$3"
+           -zplg-uncompile-plugin "${@:2}"
            ;;
        (uncompile-all)
-           -zplg-compile-uncompile-all "0"
+           -zplg-compile-uncompile-all "0" "${@:2}"
            ;;
        (compiled)
-           -zplg-compiled
+           -zplg-compiled "${@:2}"
            ;;
        (cdlist)
-           -zplg-list-compdef-replay
+           -zplg-list-compdef-replay "${@:2}"
            ;;
        (cdreplay)
-           -zplg-compdef-replay "$2"
+           -zplg-compdef-replay "${@:2}"
            ;;
        (cdclear)
-           -zplg-compdef-clear
+           -zplg-compdef-clear "${@:2}"
            ;;
        (cd)
-           -zplg-cd "$2" "$3"
+           -zplg-cd "${@:2}"
            ;;
        (edit)
-           -zplg-edit "$2" "$3"
+           -zplg-edit "${@:2}"
            ;;
        (glance)
-           -zplg-glance "$2" "$3"
+           -zplg-glance "${@:2}"
            ;;
        (changes)
-           -zplg-changes "$2" "$3"
+           -zplg-changes "${@:2}"
            ;;
        (recently)
            shift
            -zplg-recently "$@"
            ;;
        (create)
-           -zplg-create "$2" "$3"
+           -zplg-create "${@:2}"
            ;;
        (stress)
-           -zplg-stress "$2" "$3"
+           -zplg-stress "${@:2}"
            ;;
        (save)
-           -zplg-save-state "$2"
+           -zplg-save-state "${@:2}"
            ;;
        (-h|--help|help|"")
            print "${ZPLG_COL[p]}Usage${ZPLG_COL[rst]}:
