@@ -1830,6 +1830,9 @@ ZPLG_ZLE_HOOKS_LIST=(
 
 # TODO detect second autoload?
 -zplg-register-plugin() {
+    local -a opts=()
+    zparseopts -a opts -K -D f
+
     local mode="$3"
     -zplg-any-to-user-plugin "$1" "$2"
     local user="${reply[-2]}" plugin="${reply[-1]}" uspl2="${reply[-2]}/${reply[-1]}"
@@ -1837,18 +1840,23 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     if ! -zplg-exists "$user" "$plugin"; then
         ZPLG_REGISTERED_PLUGINS+=( "$uspl2" )
-    else
+    elif [ -n "${opts[(r)-f]}" ]; then
         # Allow overwrite-load, however warn about it
-        print "Warning: plugin \`$uspl2' already registered, will overwrite-load"
+        print "Warning: plugin \`$uspl2' already registered, will overwrite-load."
         ret=1
+    else
+        # We're already loaded, and we're not being forced, so it's all good.
+        print "Info: plugin \`$uspl2' already registered. If you mean to force reloading it, try \`-f' to force loading."
+        return 0
     fi
 
     # Full or light load?
     [ "$mode" = "light" ] && ZPLG_REGISTERED_STATES[$uspl2]="1" || ZPLG_REGISTERED_STATES[$uspl2]="2"
 
-    local oidx="${ZPLG_ORDER[(i)$uspl2]}"
+    local cur="${mode} ${uspl2}"
+    local oidx="${ZPLG_ORDER[(i)$cur]}"
     ZPLG_ORDER[$oidx]=()
-    ZPLG_ORDER+=("${(q)mode} ${(q)uspl2}")
+    ZPLG_ORDER+=("$cur")
 
     ZPLG_REPORTS[$uspl2]=""
     ZPLG_FUNCTIONS_BEFORE[$uspl2]=""
