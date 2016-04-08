@@ -1330,7 +1330,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 # Removes a given loadable plugin or snipet from the order stack.
 # Really only used during load of such a thing as dupes would not be pleasant.
 -zplg-remove-from-order-stack() {
-    local what="$1" name="$2" mode="$3"  # mode is not required at this time.
+    local what="$1" mode="$2" name="$3"  # mode is not required at this time.
 
     # Remove existing first since we keep unloaded ones around (commented).
     # All that we care about here is that the type/what is the same, since it's
@@ -1344,7 +1344,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 # First thing it does is remove any items of the same type and name as the one
 # being added to avoid dupes.
 -zplg-append-to-order-stack() {
-    local what="$1" name="$2" mode="$3"
+    local what="$1" mode="$2" name="$3"
     -zplg-remove-from-order-stack "$@"  # cheater
     ZPLG_ORDER+=("$what $mode $name")
 }
