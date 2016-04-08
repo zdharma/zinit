@@ -819,7 +819,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         f="${(Q)f}"
 
         # Compute for elements in left column,
-        # ones that will be paded with spaces 
+        # ones that will be paded with spaces
         if (( count ++ % 2 != 0 )); then
             [ "${#f}" -gt "$longest_left" ] && longest_left="${#f}"
             cur_left_len="${#f}"
@@ -1268,7 +1268,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         fi
         user="_local"
     fi
-    
+
     if [ -z "$user" ]; then
         user="_local"
     fi
@@ -1673,8 +1673,8 @@ ZPLG_ZLE_HOOKS_LIST=(
     }
 
     # All to the users - simulate OMZ directory structure (2/3)
-    [ ! -d "$ZPLG_PLUGINS_DIR/custom" ] && command mkdir "$ZPLG_PLUGINS_DIR/custom" 
-    [ ! -d "$ZPLG_PLUGINS_DIR/custom/plugins" ] && command mkdir "$ZPLG_PLUGINS_DIR/custom/plugins" 
+    [ ! -d "$ZPLG_PLUGINS_DIR/custom" ] && command mkdir "$ZPLG_PLUGINS_DIR/custom"
+    [ ! -d "$ZPLG_PLUGINS_DIR/custom/plugins" ] && command mkdir "$ZPLG_PLUGINS_DIR/custom/plugins"
 }
 
 # $1 - user---plugin, user/plugin, user (if $2 given), or plugin (if $2 empty)
@@ -1781,7 +1781,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     setopt localoptions nullglob
 
     typeset -a symlinked backup_comps
-    local c cfile bkpfile 
+    local c cfile bkpfile
 
     symlinked=( "$ZPLG_COMPLETIONS_DIR"/_* )
     backup_comps=( "$ZPLG_COMPLETIONS_DIR"/[^_]* )
@@ -1927,7 +1927,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     -zplg-shadow-on "$mode"
 
     # We need some state, but user wants his for his plugins
-    -zplg-restore-enter-state 
+    -zplg-restore-enter-state
     builtin source "$dname/$fname"
     # Restore our desired state for our operation
     -zplg-set-desired-shell-state
@@ -1957,7 +1957,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     local fname="${first#$dname/}"
 
     print "Compiling ${ZPLG_COL[info]}$fname${ZPLG_COL[rst]}..."
-    -zplg-restore-enter-state 
+    -zplg-restore-enter-state
     zcompile "$first" || {
         print "Compilation failed. Don't worry, the plugin will work also without compilation"
         print "Consider submitting an error report to the plugin's author"
@@ -2016,7 +2016,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     #
     # Display - resolves owner of each completion,
-    # detects if completion is disabled 
+    # detects if completion is disabled
     #
 
     integer disabled
@@ -2391,7 +2391,7 @@ ZPLG_ZLE_HOOKS_LIST=(
             print "Deleting ${ZPLG_COL[info]}range${ZPLG_COL[rst]} bindkey $sw_arr1 $sw_arr2 ${ZPLG_COL[info]}mapped to $sw_arr4${ZPLG_COL[rst]}"
             bindkey -M "$sw_arr4" -Rr "$sw_arr1"
         elif [[ "$sw_arr3" != "-M" && "$sw_arr5" = "-R" ]]; then
-            print "Deleting ${ZPLG_COL[info]}range${ZPLG_COL[rst]} bindkey $sw_arr1 $sw_arr2" 
+            print "Deleting ${ZPLG_COL[info]}range${ZPLG_COL[rst]} bindkey $sw_arr1 $sw_arr2"
             bindkey -Rr "$sw_arr1"
         elif [[ "$sw_arr3" = "-A" ]]; then
             print "Linking backup-\`main' keymap \`$sw_arr4' back to \`main'"
@@ -2571,7 +2571,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         # Find variables created or modified
         for k in "${(k)elem_post[@]}"; do
             k="${(Q)k}"
-            local v1="${(Q)elem_pre[$k]}" 
+            local v1="${(Q)elem_pre[$k]}"
             local v2="${(Q)elem_post[$k]}"
 
             # "" means a variable was deleted, not created/changed
