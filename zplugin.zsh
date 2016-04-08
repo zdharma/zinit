@@ -1852,6 +1852,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 
 # TODO detect second autoload?
 -zplg-register-plugin() {
+    # Opts can be "handled" to this function from caller (our only one: -zplg-load)
     local -a opts=("${opts[@]}")
     zparseopts -a opts -D -K f
 
@@ -2695,7 +2696,8 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     ZPLG_SNIPPETS[$url]="$filename"
 
-    -zplg-append-to-order-stack "snippet" "snippet" "$url"
+    local mode="snippet"
+    -zplg-append-to-order-stack "snippet" "$mode" "$url"
 
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
