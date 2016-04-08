@@ -2863,7 +2863,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         pre="$ZPLG_NAME"
         [[ "$state" != 0 ]] || pre="#$pre"
 
-        out+=("$pre $mode $cur")
+        out+=("${(q)pre} ${(q)mode} ${(q)cur}")
     done
 
     out="${(j.\n.)out[@]}"
