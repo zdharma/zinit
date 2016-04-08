@@ -1335,7 +1335,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     # Remove existing first since we keep unloaded ones around (commented).
     # All that we care about here is that the type/what is the same, since it's
     # exclusive.
-    local pat="${what} * ${name}"
+    local pat="${(q)what} * ${(q)name}"
     local oidx="${ZPLG_ORDER[(i)$pat]}"
     ZPLG_ORDER[$oidx]=()
 }
@@ -1346,7 +1346,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 -zplg-append-to-order-stack() {
     local what="$1" mode="$2" name="$3"
     -zplg-remove-from-order-stack "$@"  # cheater
-    ZPLG_ORDER+=("$what $mode $name")
+    ZPLG_ORDER+=("${(q)what} ${(q)mode} ${(q)name}")
 }
 
 # Will take uspl, uspl2, or just plugin name,
