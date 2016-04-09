@@ -1327,10 +1327,20 @@ ZPLG_ZLE_HOOKS_LIST=(
     return 0
 }
 
+# Convert a mode into a loadable class
+-zplg-mode-to-loadable-class() {
+    local mode="$1"
+    case "$mode" in
+        light|load) echo "plugin" ;;
+        *) echo "$mode" ;;
+    esac
+}
+
 # Removes a given loadable plugin or snipet from the order stack.
 # Really only used during load of such a thing as dupes would not be pleasant.
 -zplg-remove-from-order-stack() {
-    local what="$1" mode="$2" name="$3"  # mode is not required at this time.
+    local mode="$1" name="$2"
+    local what="$(-zplg-mode-to-loadable-class "$mode")"
 
     # Remove existing first since we keep unloaded ones around (commented).
     # All that we care about here is that the type/what is the same, since it's
@@ -1344,7 +1354,9 @@ ZPLG_ZLE_HOOKS_LIST=(
 # First thing it does is remove any items of the same type and name as the one
 # being added to avoid dupes.
 -zplg-append-to-order-stack() {
-    local what="$1" mode="$2" name="$3"
+    local mode="$1" name="$2"
+    local what="$(-zplg-mode-to-loadable-class "$mode")"
+
     -zplg-remove-from-order-stack "$@"  # cheater
     ZPLG_ORDER+=("${(q)what} ${(q)mode} ${(q)name}")
 }
@@ -1353,9 +1365,10 @@ ZPLG_ZLE_HOOKS_LIST=(
 # This is used so when a save is ran, it can continue to give you
 # the same plugin list you've always had, just in a disabled state.
 -zplg-mark-unloaded() {
-    local what="$1" mode="$2" cur="$3"
+    local mode="$1" name="$2"
+    local what="$(-zplg-mode-to-loadable-class "$mode")"
     case "$what" in
-        (plugin) ZPLG_REGISTERED_STATES[$cur]=0 ;;
+        plugin) ZPLG_REGISTERED_STATES[$name]=0 ;;
     esac
     -zplg-append-to-order-stack "$@"
 }
@@ -1889,7 +1902,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     # Full or light load?
     [ "$mode" = "light" ] && ZPLG_REGISTERED_STATES[$uspl2]="1" || ZPLG_REGISTERED_STATES[$uspl2]="2"
 
-    -zplg-append-to-order-stack "plugin" "$mode" "$uspl2"
+    -zplg-append-to-order-stack "$mode" "$uspl2"
 
     ZPLG_REPORTS[$uspl2]=""
     ZPLG_FUNCTIONS_BEFORE[$uspl2]=""
@@ -2707,8 +2720,7 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     ZPLG_SNIPPETS[$url]="$filename"
 
-    local mode="snippet"
-    -zplg-append-to-order-stack "snippet" "$mode" "$url"
+    -zplg-append-to-order-stack "snippet" "$url"
 
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
@@ -2862,83 +2874,73 @@ ZPLG_ZLE_HOOKS_LIST=(
 }
 
 -zplg-save-state() {
+    local file="${1:-$ZPLG_STATE_FILE}"
     local infoc="${ZPLG_COL[info]}"
-    local -a out=( \
-    )
-    local -a unloaded_plugins=()
-    local cur state mode pre
-    for cur in "${ZPLG_ORDER[@]}"; do
-        # space separated: $what $mode $name
-        # since we quote on the way on, this should be fine to word split
-        cur=($=cur)
-        mode="${cur[@]:1:1}"
-        cur="${cur[@]:2:1}"
+    print "[${0:t}]" "Preppng to dump state to: ${infoc}$file${reset_color}" >&2
 
-        # If we exist in here we can safely know that we are in fact a plugin, and
-        # not a snippet. If that ever changes, we'll need to look at $what/$cur[1]
-        # instead.
-        state="${ZPLG_REGISTERED_STATES[$cur]}"
-        pre="$ZPLG_NAME"
-        if [[ "$state" == 0 ]]; then
-            # This is an unloaded (ie disabled) plugin.
-            #
-            # Provided that the plugin still exists locally, let's go ahead and
-            # remember it, so future saves can also keep it handy to quickly
-            # re-enable.
-            #
-            # Even though she's no longer with us, she is still remembered.
-
-            if ! -zplg-exists-physically "$cur"; then
-                # The plugin is missing on disk.
-                # Leave the command in the output, but note that it's missing.
-                # In this case, it will be removed at the next save.
-                pre=( \
-                    "# ---" \
-                    "# Missing on disk: ${(q)mode} ${(q)cur}" \
-                    "# Will be removed next save." \
-                    "#$pre" \
-                    )
-            else
-                # The plugin still exists on disk.
-                # leave the command in the output, just commented.
-                pre=( \
-                    "$pre mark-unloaded" \
-                    )
-            fi
-            pre="${(j.\n.)pre[@]}"
-        fi
-        out+=("$pre ${(q)mode} ${(q)cur}")
-    done
-
-    out=(
+    local out=( \
         "#!/bin/zsh" \
         "#" \
         "# generated with ❤️  via $ZPLG_NAME" \
         "# - by: $USER@$HOST" \
         "# - on: $(date)" \
         "#" \
-        ""\
-        "# ---" \
+        "" \
+        "# ----------------" \
         "# plugins/snippets" \
-        "#" \
-        \
-        "${out[@]}" \
+        "# ----------------" \
+        "" \
     )
 
+    local what mode name
+    for name in "${ZPLG_ORDER[@]}"; do
+        # space separated: $what $mode $name
+        # since we quote on the way on, this should be fine to word split
+        name=($=name)
+        what="${name[@]:0:1}" mode="${name[@]:1:1}" name="${name[@]:2:1}"
+        local prefix="$ZPLG_NAME" comment=""
+
+        case "$what" in
+            plugin)
+                local state="${ZPLG_REGISTERED_STATES[$name]}"
+                if [[ -n "$state" && "$state" == 0 ]]; then
+                    # Previously loaded but currently unloaded plugin.
+
+                    # Remember them as unloaded so load order is preserved.
+                    prefix+=" unloaded"
+
+                    if ! -zplg-exists-physically "$name"; then
+                        # The plugin is missing on disk.
+                        # Leave the command in the output, but note that it's missing.
+                        comment="missing from disk at save time"
+                    fi
+                fi
+                ;;
+        esac
+        [[ -z "$comment" ]] || comment="  #$comment"
+        out+=("${prefix} ${(q)mode} ${(q)name}${comment}")
+    done
+
+    # eof
+    out+=("" "# EOF")
+    # convert to scalar
     out="${(j.\n.)out[@]}"
 
-    if [[ "$1" = - ]]; then
+    print "[${0:t}]" "Saving state to ${infoc}$file${reset_color}" >&2
+    if [[ -z "$file" || "$file" = - ]]; then
+        # use - to signify stdout, or blank string, or somehow we don't
+        # get a filename at all.
         echo "$out"
-        return
+    else
+        if [[ -f "$file" ]]; then
+            local backupfile="${file}.last"
+            print "[${0:t}]" "- File already exists: ${infoc}$file${reset_color}" >&2
+            print "[${0:t}]" "- Backing it up to: ${infoc}$backupfile${reset_color}" >&2
+            cat "$file" > "$backupfile"
+        fi
+        echo "$out" > "$file"
     fi
-
-    if [[ -f "$ZPLG_STATE_FILE" ]]; then
-        print "Backup of original state file: ${infoc}$ZPLG_STATE_FILE.last${reset_color}"
-        cat "$ZPLG_STATE_FILE" > "$ZPLG_STATE_FILE.last"
-    fi
-
-    print "Saving state to ${infoc}$ZPLG_STATE_FILE${reset_color}"
-    echo "$out" > "$ZPLG_STATE_FILE"
+    print "[${0:t}]" "Done!"
 }
 
 # Gets list of compiled plugins
@@ -3539,7 +3541,7 @@ zplugin() {
        (save)
            -zplg-save-state "${@:2}"
            ;;
-       (mark-unloaded)
+       (unloaded)
            -zplg-mark-unloaded "${@:2}"
            ;;
        (-h|--help|help|"")
