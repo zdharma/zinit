@@ -16,6 +16,13 @@ typeset -gAH ZPLG_REPORTS
 typeset -gaH ZPLG_ORDER
 
 #
+# Hook arrays
+#
+
+# on: commit of a stateful change; right after a plugin/snippet has loaded.
+typeset -gaH ZPLG_COMMIT_HOOKS=()
+
+#
 # Common needed values
 #
 
@@ -1373,6 +1380,27 @@ ZPLG_ZLE_HOOKS_LIST=(
     -zplg-append-to-order-stack "$@"
 }
 
+# Rather stupid wrapper that just runs any on-commit hooks, eg for autosave.
+# It's only abstracted out to feel better about myself.
+-zplg-commit() {
+    #local mode="$1" name="$2"
+    -zplg-hook commit "$@"
+}
+
+# Generic hook runner
+# usage: -zplg-hook HOOK_NAME [*ARGS]"$@"
+#    eg: -zplg-hook "commit" "$@"
+#        would send out the "commit" hook to each call in the array
+#        ZPLG_COMMIT_HOOKS (generated from "commit") until one fails
+#        or we run out of hookers (oh no).
+-zplg-hook() {
+    local hook="$1" hooks_var="ZPLG_${(U)1}_HOOKS"
+
+    for hooker in "${(@P)hooks_var}"; do
+        "$hooker" "$@" || break
+    done
+}
+
 # Will take uspl, uspl2, or just plugin name,
 # and return colored text
 -zplg-any-colorify-as-uspl2() {
@@ -2372,7 +2400,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         -zplg-unregister-plugin "$user" "$plugin"
     else
         -zplg-load-plugin "$@"
-        -zplg-state-changed "$mode" "$user/$plugin"
+        -zplg-commit "$mode" "$user/$plugin"
     fi
 }
 
@@ -2751,7 +2779,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     builtin source "$ZPLG_SNIPPETS_DIR/$local_dir/$filename"
     -zplg-shadow-off "compdef"
 
-    -zplg-state-changed "snippet" "$url"
+    -zplg-commit "snippet" "$url"
 }
 
 # Updates given plugin
