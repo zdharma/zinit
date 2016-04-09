@@ -1349,6 +1349,17 @@ ZPLG_ZLE_HOOKS_LIST=(
     ZPLG_ORDER+=("${(q)what} ${(q)mode} ${(q)name}")
 }
 
+# Registers a plugin in an unloaded state.
+# This is used so when a save is ran, it can continue to give you
+# the same plugin list you've always had, just in a disabled state.
+-zplg-mark-unloaded() {
+    local what="$1" mode="$2" cur="$3"
+    case "$what" in
+        (plugin) ZPLG_REGISTERED_STATES[$cur]=0 ;;
+    esac
+    -zplg-append-to-order-stack "$@"
+}
+
 # Will take uspl, uspl2, or just plugin name,
 # and return colored text
 -zplg-any-colorify-as-uspl2() {
@@ -2852,8 +2863,9 @@ ZPLG_ZLE_HOOKS_LIST=(
 
 -zplg-save-state() {
     local infoc="${ZPLG_COL[info]}"
-    local out=()
-
+    local -a out=( \
+    )
+    local -a unloaded_plugins=()
     local cur state mode pre
     for cur in "${ZPLG_ORDER[@]}"; do
         # space separated: $what $mode $name
@@ -2862,12 +2874,56 @@ ZPLG_ZLE_HOOKS_LIST=(
         mode="${cur[@]:1:1}"
         cur="${cur[@]:2:1}"
 
+        # If we exist in here we can safely know that we are in fact a plugin, and
+        # not a snippet. If that ever changes, we'll need to look at $what/$cur[1]
+        # instead.
         state="${ZPLG_REGISTERED_STATES[$cur]}"
         pre="$ZPLG_NAME"
-        [[ "$state" != 0 ]] || pre="#$pre"
+        if [[ "$state" == 0 ]]; then
+            # This is an unloaded (ie disabled) plugin.
+            #
+            # Provided that the plugin still exists locally, let's go ahead and
+            # remember it, so future saves can also keep it handy to quickly
+            # re-enable.
+            #
+            # Even though she's no longer with us, she is still remembered.
 
-        out+=("${(q)pre} ${(q)mode} ${(q)cur}")
+            if ! -zplg-exists-physically "$cur"; then
+                # The plugin is missing on disk.
+                # Leave the command in the output, but note that it's missing.
+                # In this case, it will be removed at the next save.
+                pre=( \
+                    "# ---" \
+                    "# Missing on disk: ${(q)mode} ${(q)cur}" \
+                    "# Will be removed next save." \
+                    "#$pre" \
+                    )
+            else
+                # The plugin still exists on disk.
+                # leave the command in the output, just commented.
+                pre=( \
+                    "$pre mark-unloaded" \
+                    )
+            fi
+            pre="${(j.\n.)pre[@]}"
+        fi
+        out+=("$pre ${(q)mode} ${(q)cur}")
     done
+
+    out=(
+        "#!/bin/zsh" \
+        "#" \
+        "# generated with ❤️  via $ZPLG_NAME" \
+        "# - by: $USER@$HOST" \
+        "# - on: $(date)" \
+        "#" \
+        ""\
+        "# ---" \
+        "# plugins/snippets" \
+        "#" \
+        \
+        "${out[@]}" \
+    )
 
     out="${(j.\n.)out[@]}"
 
@@ -3482,6 +3538,9 @@ zplugin() {
            ;;
        (save)
            -zplg-save-state "${@:2}"
+           ;;
+       (mark-unloaded)
+           -zplg-mark-unloaded "${@:2}"
            ;;
        (-h|--help|help|"")
            print "${ZPLG_COL[p]}Usage${ZPLG_COL[rst]}:
