@@ -1901,7 +1901,6 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     # Full or light load?
     [ "$mode" = "light" ] && ZPLG_REGISTERED_STATES[$uspl2]="1" || ZPLG_REGISTERED_STATES[$uspl2]="2"
-
     -zplg-append-to-order-stack "$mode" "$uspl2"
 
     ZPLG_REPORTS[$uspl2]=""
@@ -2373,6 +2372,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         -zplg-unregister-plugin "$user" "$plugin"
     else
         -zplg-load-plugin "$@"
+        -zplg-state-changed "$mode" "$user/$plugin"
     fi
 }
 
@@ -2720,8 +2720,6 @@ ZPLG_ZLE_HOOKS_LIST=(
 
     ZPLG_SNIPPETS[$url]="$filename"
 
-    -zplg-append-to-order-stack "snippet" "$url"
-
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
         url="${url/\/blob\///raw/}"
@@ -2752,6 +2750,8 @@ ZPLG_ZLE_HOOKS_LIST=(
     -zplg-shadow-on "compdef"
     builtin source "$ZPLG_SNIPPETS_DIR/$local_dir/$filename"
     -zplg-shadow-off "compdef"
+
+    -zplg-state-changed "snippet" "$url"
 }
 
 # Updates given plugin
