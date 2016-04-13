@@ -2392,7 +2392,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     set -- "$mode" "$@"
 
     -zplg-any-to-user-plugin "$2" "$3"
-    local user="${reply[-2]}" plugin="${reply[-1]}"
+    local uspl2="${reply[-2]}/${reply[-1]}" user="${reply[-2]}" plugin="${reply[-1]}"
     set -- "$mode" "$user" "$plugin" "${@:4}"
 
     -zplg-register-plugin "$@"
@@ -2400,7 +2400,7 @@ ZPLG_ZLE_HOOKS_LIST=(
         -zplg-unregister-plugin "$user" "$plugin"
     else
         -zplg-load-plugin "$@"
-        -zplg-commit "$mode" "$user/$plugin"
+        -zplg-commit "$mode" "$uspl2"
     fi
 }
 
