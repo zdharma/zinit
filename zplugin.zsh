@@ -2747,6 +2747,7 @@ ZPLG_ZLE_HOOKS_LIST=(
     fi
 
     ZPLG_SNIPPETS[$url]="$filename"
+    -zplg-append-to-order-stack "snippet" "$url"
 
     # Change the url to point to raw github content if it isn't like that
     if (( is_no_raw_github )); then
