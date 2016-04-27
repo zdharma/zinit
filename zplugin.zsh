@@ -2965,9 +2965,9 @@ ZPLG_ZLE_HOOKS_LIST=(
             local backupfile="${file}.last"
             print "[${0:t}]" "- File already exists: ${infoc}$file${reset_color}" >&2
             print "[${0:t}]" "- Backing it up to: ${infoc}$backupfile${reset_color}" >&2
-            cat "$file" > "$backupfile"
+            cat "$file" >| "$backupfile"
         fi
-        echo "$out" > "$file"
+        echo "$out" >| "$file"
     fi
     print "[${0:t}]" "Done!"
 }
