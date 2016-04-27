@@ -21,6 +21,7 @@ typeset -gaH ZPLG_ORDER
 
 # on: commit of a stateful change; right after a plugin/snippet has loaded.
 typeset -gaH ZPLG_COMMIT_HOOKS=()
+# TODO Make the above an associative array of $hook_name=("$hooks[@]}")
 
 #
 # Common needed values
