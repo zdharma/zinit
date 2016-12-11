@@ -1803,7 +1803,7 @@ builtin setopt noaliases
         print "Downloading $REPLY..."
 
         # Return with error when any problem
-        git clone --recursive https://github.com/"$github_path" "$ZPLG_PLUGINS_DIR/${user}---${plugin}" || return 1
+        git clone --recursive git@github.com:"$github_path".git "$ZPLG_PLUGINS_DIR/${user}---${plugin}" || return 1
 
         # Install completions
         -zplg-install-completions "$user" "$plugin" "0"
