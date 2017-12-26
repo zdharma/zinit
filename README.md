@@ -50,7 +50,7 @@ install everything from Github and other sites. For example, in order to install
 [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS), which isn't a Zsh
 plugin:
 
-```SystemVerilog
+```zsh
 # For GNU ls (the binaries can be gls, gdircolors)
 zplugin ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh"
 zplugin light trapd00r/LS_COLORS
@@ -58,7 +58,7 @@ zplugin light trapd00r/LS_COLORS
 
 Other example: direnv written in Go, requiring building after cloning:
 
-```SystemVerilog
+```zsh
 # make'!...' -> run make before atclone & atpull
 zplugin ice as"command" make'!' atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' src"zhook.zsh"
 zplg light direnv/direnv
@@ -86,13 +86,13 @@ to call `compinit` only once in `.zshrc`.
 
 To install, execute:
 
-```SystemVerilog
+```zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zplugin/master/doc/install.sh)"
 ```
 
 Then add to `~/.zshrc`, at bottom:
 
-```SystemVerilog
+```zsh
 zplugin load zdharma history-search-multi-word
 zplugin load zdharma/zui
 
@@ -122,7 +122,7 @@ zplugin creinstall %HOME/my_completions  # Handle completions without loading an
 
 (No need to add:
 
-```SystemVerilog
+```zsh
 source "$HOME/.zplugin/bin/zplugin.zsh"
 ```
 
@@ -161,13 +161,13 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
   - New ice modifier – `make`. It causes the `make`-command to be executed after cloning or updating
     plugins and snippets. For example there's `Zshelldoc` that uses `Makefile` to build final scripts:
 
-    ```SystemVerilog
+    ```zsh
     zplugin ice as"command" pick"build/zsd*" make; zplugin light zdharma/zshelldoc
     ```
 
     The above doesn't trigger the `install` target, but this does:
 
-    ```SystemVerilog
+    ```zsh
     zplugin ice as"command" pick"build/zsd*" make"install PREFIX=/tmp"; zplugin light zdharma/zshelldoc
     ```
 
@@ -188,7 +188,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
   - Subversion protocol (supported by Github) can be used to clone **subdirectories** when using
     snippets. This allows to load multi-file snippets. For example:
 
-    ```SystemVerilog
+    ```zsh
     zstyle ':prezto:module:prompt' theme smiley
     zplugin ice svn silent; zplugin snippet PZT::modules/prompt
     ```
@@ -197,7 +197,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
     like in the example above. One can load `Prezto` module as single file snippet, or use Subversion
     to download whole directory (see also description of [Ice Modifiers](#ice-modifiers)):
 
-    ```SystemVerilog
+    ```zsh
     # Single file snippet, URL points to file
     zplg snippet PZT::modules/helper/init.zsh
 
@@ -214,7 +214,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
 * 13-10-2017
   - Snippets can use "**OMZ::**" prefix to easily point to `Oh-My-Zsh` plugins and libraries, e.g.:
 
-    ```SystemVerilog
+    ```zsh
     zplugin snippet OMZ::lib/git.zsh
     zplugin snippet OMZ::plugins/git/git.plugin.zsh
     ```
@@ -224,7 +224,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
   - The `times` subcommand now includes statistics on snippets. Also, entries
     are displayed in order of loading:
 
-    ```SystemVerilog
+    ```zsh
     % zplg times
     Plugin loading times:
     0.010 sec - OMZ::lib/git.zsh
@@ -240,7 +240,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
 * 13-06-2017
   - Plugins can now be absolute paths:
 
-    ```SystemVerilog
+    ```zsh
     % zplg load %HOME/github/{directory}
     % zplg load /Users/sgniazdowski/github/{directory}
     % zplg load %/Users/sgniazdowski/github/{directory}
@@ -251,7 +251,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
 * 23-05-2017
   - New `ice` modifier: `if`, to which you can provide a conditional expression:
 
-    ```SystemVerilog
+    ```zsh
     % zplugin ice if"(( 0 ))"
     % zplugin snippet --command https://github.com/b4b4r07/httpstat/blob/master/httpstat.sh
     % zplugin ice if"(( 1 ))"
@@ -265,7 +265,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
     melts. You add modifiers to single next command, and the format (using quotes) guarantees
     you will see syntax highlighting in editors:
 
-    ```SystemVerilog
+    ```zsh
     % zplg ice from"notabug" atload"echo --Loaded--" atclone"echo --Cloned--"
     % zplg load zdharma/zui
     Downloading zdharma/zui...
@@ -284,7 +284,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
     plugin. With `ice` modifier `blockf` (block-fpath), you can manage completions in such plugins (plugin can be
     normally loaded and it will be blocked from updating `$fpath`):
 
-    ```SystemVerilog
+    ```zsh
     % zplg ice blockf
     % zplg load zsh-users/zsh-completions
     ...
@@ -317,7 +317,7 @@ The `ice` subcommand – modifiers for following single command. `notabug` –�
 
 **Example use:**
 
-```SystemVerilog
+```zsh
 % zplugin load zdharma/history-search-multi-word
 % zplugin light zsh-users/zsh-syntax-highlighting
 ```
@@ -332,14 +332,14 @@ needs the tracking; also note: in turbo mode the slowdown caused by tracking isn
 To load Oh-My-Zsh and Prezto plugins, use `snippet` feature. Snippets are single files downloaded
 by `curl`, `wget`, etc. directly from URL. For example:
 
-```SystemVerilog
+```zsh
 % zplugin snippet 'https://github.com/robbyrussell/oh-my-zsh/raw/master/plugins/git/git.plugin.zsh'
 % zplugin snippet 'https://github.com/sorin-ionescu/prezto/blob/master/modules/helper/init.zsh'
 ```
 
 Also, you can use `OMZ::` and `PZT::` shorthands:
 
-```SystemVerilog
+```zsh
 % zplugin snippet OMZ::plugins/git/git.plugin.zsh
 % zplugin snippet PZT::modules/helper/init.zsh
 ```
@@ -348,7 +348,7 @@ Moreover, snippets support `Subversion` protocol, supported also by Github. This
 snippets that are multi-file (for example a Prezto module can have file `init.zsh` and file `alias.zsh`).
 Default files that will be sourced are: `*.plugin.zsh`, `init.zsh`, `*.zsh-theme`:
 
-```SystemVerilog
+```zsh
 # URL points to directory
 % zplugin ice svn; zplugin snippet PZT::modules/docker
 ```
@@ -365,7 +365,7 @@ The command `zplugin ice` provides Ice-modifiers for single next command (see su
 The logic is that "ice" is something that melts (so it doesn't last long) and something that's added. Using other
 Ice-modifier "**pick**" user can explicitly select the file to source:
 
-```SystemVerilog
+```zsh
 % zplugin ice svn pick"init.zsh"; zplugin snippet PZT::modules/git
 ```
 
@@ -377,7 +377,7 @@ Ice-mod name. This way editors like `vim` and `emacs` will highlight contents of
 A plugin might not be a file for sourcing, but a command to be added to `$PATH`. To obtain this
 effect, use Ice-modifier `as` with value `command`.
 
-```SystemVerilog
+```zsh
 % zplugin ice as"command" cp"httpstat.sh -> httpstat" pick"httpstat"
 % zplugin light b4b4r07/httpstat
 ```
@@ -392,7 +392,7 @@ Copying file is safe for doing later updates – original files of repository a
 `Git` will report no conflicts. However, `mv` also can be used, if a proper `atpull` (an Ice–modifier
 ran at **update** of plugin) will be used:
 
-```SystemVerilog
+```zsh
 % zplugin ice as"command" mv"httpstat.sh -> httpstat" pick"httpstat" atpull'!git reset --hard'
 % zplugin light b4b4r07/httpstat
 ```
@@ -411,7 +411,7 @@ enclose contents of `atpull` Ice-mod.
 
 Commands can also be added to `$PATH` using **snippets**. For example:
 
-```SystemVerilog
+```zsh
 % zplugin ice mv"httpstat.sh -> httpstat" pick"httpstat" as"command"
 % zplugin snippet https://github.com/b4b4r07/httpstat/blob/master/httpstat.sh
 ```
@@ -425,7 +425,7 @@ up its main directory).
 Zplugin allows to disable and enable each completion in every plugin. Try installing a
 popular plugin that provides completions:
 
-```SystemVerilog
+```zsh
 % zplugin ice blockf
 % zplugin light zsh-users/zsh-completions
 ```
@@ -434,7 +434,7 @@ First command will block the traditional method of adding completions. Zplugin u
 method (based on symlinks instead of adding to `$fpath`). Zplugin will automatically *install*
 completions of newly downloaded plugin. To uninstall, and install again, use
 
-```SystemVerilog
+```zsh
 % zplg cuninstall zsh-users/zsh-completions   # uninstall
 % zplg creinstall zsh-users/zsh-completions   # install
 ```
@@ -444,7 +444,7 @@ completions of newly downloaded plugin. To uninstall, and install again, use
 (Note: `zplg` is an alias that can be used in interactive sessions). To see what completions
 *all* plugins provide, in tabular formatting and with name of each plugin, use:
 
-```SystemVerilog
+```zsh
 % zplg clist
 ```
 
@@ -452,7 +452,7 @@ This command is specially adapted for plugins like `zsh-users/zsh-completions`, 
 many completions – listing will have `3` completions per line, so that not many terminal pages
 will be occupied, like this:
 
-```SystemVerilog
+```zsh
 ...
 atach, bitcoin-cli, bower    zsh-users/zsh-completions
 bundle, caffeinate, cap      zsh-users/zsh-completions
@@ -463,7 +463,7 @@ cask, cf, chattr             zsh-users/zsh-completions
 You can show more completions per line by providing an *argument* to `clist`, e.g. `zplg clist 6`,
 will show:
 
-```SystemVerilog
+```zsh
 ...
 bundle, caffeinate, cap, cask, cf, chattr      zsh-users/zsh-completions
 cheat, choc, cmake, coffee, column, composer   zsh-users/zsh-completions
@@ -476,7 +476,7 @@ console, dad, debuild, dget, dhcpcd, diana     zsh-users/zsh-completions
 Completions can be disabled, so that e.g. original Zsh completion will be used.
 The commands are very basic, they only need completion *name*:
 
-```
+```zsh
 % zplg cdisable cmake
 Disabled cmake completion belonging to zsh-users/zsh-completions
 % zplg cenable cmake
@@ -491,7 +491,7 @@ installed. This sums up to complete control over completions.
 
 In general, to use *subdirectories* of Github projects as snippets add `/trunk/{path-to-dir}` to URL, for example:
 
-```SystemVerilog
+```zsh
 % zplugin ice svn; zplugin snippet https://github.com/zsh-users/zsh-completions/trunk/src
 ```
 
@@ -511,7 +511,7 @@ of plugins automatic queueing for next free time slot (i.e. delaying) is perform
 Zsh 5.3 or greater is required. To use this Turbo Mode add `wait` ice to the
 target plugin in one of following ways:
 
-```SystemVerilog
+```zsh
 PS1="READY > "
 zplugin ice wait'!1' atload'promptinit; prompt scala3'
 zplugin load psprint/zprompts
@@ -525,14 +525,14 @@ I might resign from this one day.
 The exclamation mark causes Zplugin to reset-prompt after loading plugin. The same
 with Prezto prompts:
 
-```SystemVerilog
+```zsh
 zplg ice svn silent wait'!1' atload'prompt smiley'
 zplg snippet PZT::modules/prompt
 ```
 
 Using `zsh-users/zsh-autosuggestions` without any drawbacks:
 
-```SystemVerilog
+```zsh
 zplugin ice wait'1' atload'_zsh_autosuggest_start'
 zplugin light zsh-users/zsh-autosuggestions
 ```
@@ -542,7 +542,7 @@ Turbo Mode will wait `1` second so `precmd` will be called earlier than load of 
 makes autosuggestions inactive at first prompt. But the given `atload` Ice-mod fixes this, it calls
 the same function `precmd` would, right after loading autosuggestions.
 
-```SystemVerilog
+```zsh
 zplugin ice wait'[[ -n ${ZLAST_COMMANDS[(r)cras*]} ]]'
 zplugin load zdharma/zplugin-crasis
 ```
@@ -557,7 +557,7 @@ dedicated plugin is comming soon.
 
 Ices `load` and `unload` allow to define when you want plugins active or unactive. For example:
 
-```SystemVerilog
+```zsh
 # Load when in ~/tmp
 zplugin ice load'![[ $PWD = */tmp ]]' unload'![[ $PWD != */tmp ]]' atload"promptinit; prompt sprint3"
 zplugin load psprint/zprompts
@@ -712,7 +712,7 @@ compiled                 - list plugins that are compiled
 
 To use **themes** created for `Oh-My-Zsh` you might want to first source the `git` library there:
 
-```SystemVerilog
+```zsh
 zplugin snippet http://github.com/robbyrussell/oh-my-zsh/raw/master/lib/git.zsh
 # Or using OMZ:: shorthand:
 zplugin snippet OMZ::lib/git.zsh
@@ -723,7 +723,7 @@ Some themes require not only
 `Oh-My-Zsh's` `git` **library**, but also `git` **plugin** (error about function `current_branch` appears, or a similar one).
 Load this plugin as single-file snippet:
 
-```SystemVerilog
+```zsh
 zplugin snippet OMZ::plugins/git/git.plugin.zsh
 ```
 
@@ -739,7 +739,7 @@ You might want to supress completions provided by the git plugin by issuing `zpl
 
 To summarize:
 
-```SystemVerilog
+```zsh
 # Load OMZ Git library
 zplugin snippet OMZ::lib/git.zsh
 
@@ -788,7 +788,7 @@ Performance gains are huge, example shell startup time with double `compinit`: *
 If you want to ignore compdefs provided by some plugins or snippets, place their load commands
 before commands loading other plugins or snippets, and issue `zplugin cdclear`:
 
-```SystemVerilog
+```zsh
 source ~/.zplugin/bin/zplugin.zsh
 zplugin snippet OMZ::plugins/git/git.plugin.zsh
 zplugin cdclear -q # <- forget completions provided by Git plugin
