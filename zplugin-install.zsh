@@ -318,6 +318,9 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
 # $1 - plugin spec (4 formats: user---plugin, user/plugin, user, plugin)
 # $2 - plugin (only when $1 - i.e. user - given)
 -zplg-compile-plugin() {
+    # Prevent parse errors from global aliases or reserved word overloading
+    setopt localoptions noaliases
+
     -zplg-any-to-user-plugin "$1" "$2"
     local user="${reply[-2]}" plugin="${reply[-1]}" first
     local plugin_dir="${${${(M)plugin:#%}:+$plugin}:-${ZPLGM[PLUGINS_DIR]}/${user}---${plugin}}"
@@ -374,7 +377,7 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
 # supports Subversion protocol and allows to clone subdirectories.
 # This is used to provide a layer of support for Oh-My-Zsh and Prezto.
 -zplg-download-snippet() {
-    setopt localoptions extendedglob noksharrays
+    setopt localoptions extendedglob noksharrays noaliases
 
     local save_url="$1" url="$2" local_dir="$3" filename0="$4" filename="$5" update="$6"
     integer retval=0
