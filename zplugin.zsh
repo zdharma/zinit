@@ -1,6 +1,10 @@
 # -*- mode: shell-script -*-
 # vim:ft=zsh
 
+# Global aliases and overloaded reserved words can cause parse errors
+[[ -o aliases ]] && _setopt_aliases=1
+builtin set -o no_aliases
+
 #
 # Main state variables
 #
@@ -1436,6 +1440,8 @@ builtin setopt noaliases
 #      allows to run package installations from script, not from prompt
 #
 -zplg-scheduler() {
+    setopt localoptions noaliases
+
     integer __ret=$?
     [[ "$1" = "following" ]] && sched +1 "-zplg-scheduler following"
     [[ -n "$1" && "$1" != (following|burst) ]] && { local THEFD="$1"; zle -F "$THEFD"; exec {THEFD}<&-; }
@@ -1498,6 +1504,8 @@ builtin setopt noaliases
 # Main function directly exposed to user, obtains subcommand
 # and its arguments, has completion.
 zplugin() {
+    setopt localoptions noaliases
+
     [[ "$1" != "ice" ]] && {
         local -a ice
         ice=( "${(kv)ZPLG_ICE[@]}" )
@@ -1822,4 +1830,10 @@ fi
 # Colorize completions for commands unload, report, creinstall, cuninstall
 zstyle ':completion:*:zplugin:argument-rest:plugins' list-colors '=(#b)(*)/(*)==1;35=1;33'
 zstyle ':completion:*:zplugin:argument-rest:plugins' matcher 'r:|=** l:|=*'
+
+# Restore shell option 'aliases' if it was previously enabled
+if [[ $_setopt_aliases = 1 ]]; then
+   set -o aliases
+   builtin unset _setopt_aliases
+fi
 # }}}
