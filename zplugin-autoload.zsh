@@ -2508,7 +2508,7 @@ ZPLGM[EXTENDED_GLOB]=""
     local el val cand1 cand2 local_dir filename
 
     local -a ice_order nval_ices output
-    ice_order=( svn proto from teleid id-as depth if wait load unload blockf pick bpick src as ver silent mv cp atinit atclone atload atpull make service )
+    ice_order=( svn proto from teleid id-as cloneopts depth if wait load unload blockf pick bpick src as ver silent mv cp atinit atclone atload atpull make service )
     nval_ices=( blockf silent svn )
     -zplg-compute-ice "$1${${1:##(%|/)*}:+/}$2" "pack" ice local_dir filename || return 1
 
@@ -2651,6 +2651,6 @@ env-whitelist [-v]       - allows to specify names (also patterns) of variables 
 bindkeys                 - lists bindkeys set up by each plugin
 module                   - manage binary Zsh module shipped with Zplugin, see \`zplugin module help'
 
-Available ice-modifiers: proto from depth if wait load unload blockf pick bpick src as
+Available ice-modifiers: proto from cloneopts depth if wait load unload blockf pick bpick src as
                          ver silent svn mv cp atinit atclone atload atpull make service"
 } # }}}
