@@ -80,6 +80,6 @@ zplugin light chauncey-garrett/zsh-prompt-garrett
 zplugin ice svn atload"prompt garrett"
 zplugin snippet PZT::modules/prompt
 
-zplugin ice nocompletions atclone'prompt_p10k_compile' atpull'%atclone'
+zplugin ice nocompletions compile"{p10k_functions/*,segments/*,p10k.zsh}" atpull'prompt_p10k_compile'
 zplugin load robobenklein/p10k
 ```
