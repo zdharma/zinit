@@ -69,7 +69,7 @@ ZPLGM[RIGHTAR]=";:^[[C;:^[OC;:\\e[C;:\\eOC;:${termcap[kr]/$'\e'/^\[};:${terminfo
 ZPLGM[LEFTAR]=";:^[[D;:^[OD;:\\e[D;:\\eOD;:${termcap[kl]/$'\e'/^\[};:${terminfo[kcub1]/$'\e'/^\[};:"
 
 builtin autoload -Uz is-at-least
-is-at-least 5.1 && ZPLGM[NEW_AUTOLOAD]=1 || ZPLGM[NEW_AUTOLOAD]=0
+is-at-least 5.0.2 && ZPLGM[NEW_AUTOLOAD]=1 || ZPLGM[NEW_AUTOLOAD]=0
 #is-at-least 5.4 && ZPLGM[NEW_AUTOLOAD]=2
 
 # Parameters - shadowing {{{
