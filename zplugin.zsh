@@ -1617,8 +1617,8 @@ aliases${~exts})(*) ]] && ZPLG_ICES[${match[1]}]+="${ZPLG_ICES[${match[1]}]:+;}$
 #      script, not from prompt
 #
 -zplg-scheduler() {
-    integer __ret=$?
-    [[ "$1" = "following" ]] && sched +1 "ZPLGM[underscore]=\$_; ZPLGM[printexitvalue_opt]=\$options[printexitvalue]; -zplg-scheduler following \${ZPLGM[underscore]}"
+    integer __ret=${__ret:-$?}
+    [[ "$1" = "following" ]] && sched +1 "__ret=\$?; ZPLGM[underscore]=\$_; ZPLGM[printexitvalue_opt]=\$options[printexitvalue]; -zplg-scheduler following \${ZPLGM[underscore]}"
     [[ -n "$1" && "$1" != (following*|burst) ]] && { local THEFD="$1"; zle -F "$THEFD"; exec {THEFD}<&-; }
     [[ "$1" = "burst" ]] && local -h EPOCHSECONDS=$(( EPOCHSECONDS+10000 ))
 
@@ -1680,7 +1680,7 @@ aliases${~exts})(*) ]] && ZPLG_ICES[${match[1]}]+="${ZPLG_ICES[${match[1]}]:+;}$
         # There's a bug in Zsh: first sched call would not be issued
         # until a key-press, if "sched +1 ..." would be called inside
         # zle -F handler. So it's done here, in precmd-handle code.
-        sched +1 "ZPLGM[underscore]=\$_; ZPLGM[printexitvalue_opt]=\$options[printexitvalue]; -zplg-scheduler following \${ZPLGM[underscore]}"
+        sched +1 "__ret=\$?; ZPLGM[underscore]=\$_; ZPLGM[printexitvalue_opt]=\$options[printexitvalue]; -zplg-scheduler following \${ZPLGM[underscore]}"
 
         ANFD="13371337" # for older Zsh + noclobber option
         exec {ANFD}< <(LANG=C command sleep 0.002; builtin print run;)
@@ -1692,7 +1692,7 @@ aliases${~exts})(*) ]] && ZPLG_ICES[${match[1]}]+="${ZPLG_ICES[${match[1]}]:+;}$
     for __task in "${ZPLG_RUN[@]}"; do
         -zplg-run-task 1 "${(@z)__task}" && ZPLG_TASKS+=( "$__task" )
         [[ $(( ++__idx, __count += ${${REPLY:+1}:-0} )) -gt 0 && "$1" != "burst" ]] && \
-            { 
+            {
                 ANFD="13371337" # for older Zsh + noclobber option
                 exec {ANFD}< <(LANG=C command sleep 0.002; builtin print run;)
                 command true # workaround a Zsh bug, see: http://www.zsh.org/mla/workers/2018/msg00966.html
