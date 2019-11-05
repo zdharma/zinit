@@ -1891,7 +1891,7 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run) ]] && \
                         else
                             ZPLG_SICE[${${1#https://github.com/}%%(/|//|///)}]=""
                             -zplg-submit-turbo p${ZPLG_ICE[service]:+1} \
-                                "${${${(M)+ZPLG_ICE[light]:#1}:+light}:-load}" \
+                                "${${(M)+ZPLG_ICE[light]+light}:-load}" \
                                 "${${1#https://github.com/}%%(/|//|///)}" ""
                         fi
                         __retval+=$?
