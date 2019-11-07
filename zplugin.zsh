@@ -1856,27 +1856,6 @@ dunload|dreport|dclear|compile|uncompile|compiled|cdlist|cdreplay|cdclear|srv|re
 env-whitelist|bindkeys|module|add-fpath|fpath|run) || $1 = (load|light|snippet) ]] && \
     {
         if [[ $1 = (load|light|snippet) ]]; then
-            # Trigger-load short-circuit
-            if [[ -n ${ZPLG_ICE[trigger-load]} ]] {
-                () {
-                    setopt localoptions extendedglob
-                    for MATCH ( ${(s.;.)ZPLG_ICE[trigger-load]} ) {
-                        eval "${MATCH#!}() {
-                            ${${(M)MATCH#!}:+unset -f ${MATCH#!}}
-                            local a b; local -a ices
-                            # The wait'' ice is filtered-out
-                            for a b ( ${(qqkv@)${(kv@)ZPLG_ICE[(I)^(trigger-load|wait)]}} ) {
-                                ices+=( \"\$a\$b\" )
-                            }
-                            zplugin ice \${ices[@]}; zplugin $1 ${(qqq)2}
-                            ${${(M)MATCH#!}:+# Forward the call
-                            eval ${MATCH#!} \$@}
-                        }"
-                    }
-                } "$@"
-                return $?
-            }
-
             # Classic syntax -> simulate a call through the for-syntax
             : ${@[@]//(#b)(-b|--command|-f)/${ICE_OPTS[${match[1]}]::=1}}
             set -- "${@[@]:#(-b|--command|-f)}"
