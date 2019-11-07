@@ -1921,6 +1921,29 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run) || $1 = (load|light|snippet) 
                     [[ -n ${ZPLG_ICE[is-snippet]+1} || $1 = ((#i)(http(s|)|ftp(s|)):/|((OMZ|PZT)::))* ]] && \
                         __is_snippet=1
 
+                    if [[ -n ${ZPLG_ICE[trigger-load]} ]] {
+                        () {
+                            setopt localoptions extendedglob
+                            local mode
+                            (( __is_snippet )) && mode="snippet" || mode="${${${ZPLG_ICE[light-mode]+light}}:-load}"
+                            for MATCH ( ${(s.;.)ZPLG_ICE[trigger-load]} ) {
+                                eval "${MATCH#!}() {
+                                    ${${(M)MATCH#!}:+unset -f ${MATCH#!}}
+                                    local a b; local -a ices
+                                    # The wait'' ice is filtered-out
+                                    for a b ( ${(qqkv@)${(kv@)ZPLG_ICE[(I)^(trigger-load|wait|light-mode)]}} ) {
+                                        ices+=( \"\$a\$b\" )
+                                    }
+                                    zplugin ice \${ices[@]}; zplugin $mode ${(qqq)1}
+                                    ${${(M)MATCH#!}:+# Forward the call
+                                    eval ${MATCH#!} \$@}
+                                }"
+                            }
+                        } "$@"
+                        __retval+=$?
+                        (( __retval )) && return __retval || { (( $# )) && shift; continue; }
+                    }
+
                     ZPLG_ICE[wait]="${${(M)${+ZPLG_ICE[wait]}:#1}:+${${ZPLG_ICE[wait]#!}:-${(M)ZPLG_ICE[wait]#!}0}}"
                     if [[ -n "${ZPLG_ICE[wait]}${ZPLG_ICE[load]}${ZPLG_ICE[unload]}${ZPLG_ICE[service]}${ZPLG_ICE[subscribe]}" ]]; then
                         ZPLG_ICE[wait]="${ZPLG_ICE[wait]:-${ZPLG_ICE[service]:+0}}"
