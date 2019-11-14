@@ -724,17 +724,17 @@ function $f {
 
     [[ "$2" = "begin" ]] && {
             { [[ -z "${ZPLGM[PATH_BEFORE__$uspl2]}" ]] && \
-                tmp=( "${(q)path[@]}" )
+                tmp=( "${(qq)path[@]}" )
                 ZPLGM[PATH_BEFORE__$1]="${tmp[*]}"
             }
             { [[ -z "${ZPLGM[FPATH_BEFORE__$uspl2]}" ]] && \
-                tmp=( "${(q)fpath[@]}" )
+                tmp=( "${(qq)fpath[@]}" )
                 ZPLGM[FPATH_BEFORE__$1]="${tmp[*]}"
             }
     } || {
-            tmp=( "${(q)path[@]}" )
+            tmp=( "${(qq)path[@]}" )
             ZPLGM[PATH_AFTER__$1]+=" ${tmp[*]}"
-            tmp=( "${(q)fpath[@]}" )
+            tmp=( "${(qq)fpath[@]}" )
             ZPLGM[FPATH_AFTER__$1]+=" ${tmp[*]}"
     }
 } # }}}
