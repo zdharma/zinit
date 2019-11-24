@@ -1477,7 +1477,7 @@ ZPLGM[EXTENDED_GLOB]=""
                   )
                   [[ ${ice[atpull]} = "!"* ]] && -zplg-countdown "atpull" && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" "${ice[atclone]}"; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" "${ice[atclone]}"; )
                   ZPLG_ICE=()
-                  (( !skip_pull )) && command git "${${+ice[ver]+merge}:-pull}" --no-stat ${ice[ver]}
+                  (( !skip_pull )) && command git merge --no-stat ${ice[ver]:-FETCH_HEAD}
               }
             )
         }
