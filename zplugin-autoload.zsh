@@ -1428,7 +1428,7 @@ ZPLGM[EXTENDED_GLOB]=""
               integer had_output=0
               local IFS=$'\n'
               command git fetch --quiet && \
-                command git log --color --date=short --pretty=format:'%Cgreen%cd %h %Creset%s %Cred%d%Creset%n' ..FETCH_HEAD | \
+                command git log --color --date=short --pretty=format:'%Cgreen%cd %h %Creset%s %Cred%d%Creset%n' .."${ice[ver]:-FETCH_HEAD}" | \
                 while read line; do
                   [[ -n "${line%%[[:space:]]##}" ]] && {
                       [[ $had_output -eq 0 ]] && {
@@ -1477,14 +1477,14 @@ ZPLGM[EXTENDED_GLOB]=""
                   )
                   [[ ${ice[atpull]} = "!"* ]] && -zplg-countdown "atpull" && ( (( ${+ice[nocd]} == 0 )) && { builtin cd -q "$local_dir" && -zplg-at-eval "${ice[atpull]#\!}" "${ice[atclone]}"; ((1)); } || -zplg-at-eval "${ice[atpull]#\!}" "${ice[atclone]}"; )
                   ZPLG_ICE=()
-                  (( !skip_pull )) && command git pull --no-stat
+                  (( !skip_pull )) && command git "${${+ice[ver]+merge}:-pull}" --no-stat ${ice[ver]}
               }
             )
         }
 
         [[ -d "$local_dir/.git" ]] && \
             (  builtin cd -q "$local_dir" # || return 1 - don't return, maybe it's some hook's logic
-               command git pull --recurse-submodules
+               command git submodule update --init --recursive
             )
 
         local -a log
@@ -1535,7 +1535,7 @@ ZPLGM[EXTENDED_GLOB]=""
                 "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_dir" atpull
             done
             ZPLG_ICE=()
-        }
+        } || { [[ ${ICE_OPTS[opt_-q,--quiet]} != 1 && -z ${ice[is_release]} ]] && print "Already up to date." }
 
         # Store ices to disk at update of plugin
         -zplg-store-ices "$local_dir/._zplugin" ice "" "" "" ""
