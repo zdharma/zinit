@@ -938,7 +938,11 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
 
     local url="https://github.com/$user/$plugin/releases/${ice[ver]:-latest}"
 
-    local -A matchstr=(
+    local -a list
+    list=( ${(@f)"$( { -zplg-download-file-stdout $url || -zplg-download-file-stdout $url 1; } 2>/dev/null | \
+                  command grep -o 'href=./'$user'/'$plugin'/releases/download/[^"]\+')"} )
+    [[ -n ${ice[ver]} ]] && {
+        local -A matchstr=(
         "i386"    "(386|686)"
         "i686"    "(386|686)"
         "x86_64"  "(x86_64|amd64|intel)"
@@ -948,23 +952,23 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
         "darwin"  "(darwin|macos|mac-os|osx|os-x)"
         "cygwin"  "(windows|cygwin)"
         "windows" "(windows|cygwin)"
-    )
+        )
+        local -a list2
 
-    local -a list list2
-    list=( ${(@f)"$( { -zplg-download-file-stdout $url || -zplg-download-file-stdout $url 1; } 2>/dev/null | \
-                  command grep -o 'href=./'$user'/'$plugin'/releases/download/[^"]\+')"} )
+        list=( "${list[@]#href=?}" )
+        [[ -n "${ice[bpick]}" ]] && list=( "${(M)list[@]:#(#i)*/${~ice[bpick]}}" )
 
-    list=( "${list[@]#href=?}" )
-    [[ -n "${ice[bpick]}" ]] && list=( "${(M)list[@]:#(#i)*/${~ice[bpick]}}" )
+        [[ ${#list} -gt 1 ]] && {
+            list2=( "${(M)list[@]:#(#i)*${~matchstr[$CPUTYPE]:-${CPUTYPE#(#i)(i|amd)}}*}" )
+            [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+        }
 
-    [[ ${#list} -gt 1 ]] && {
-        list2=( "${(M)list[@]:#(#i)*${~matchstr[$CPUTYPE]:-${CPUTYPE#(#i)(i|amd)}}*}" )
-        [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
-    }
-
-    [[ ${#list} -gt 1 ]] && {
-        list2=( "${(M)list[@]:#(#i)*${~matchstr[${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}]:-${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}}*}" )
-        [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+        [[ ${#list} -gt 1 ]] && {
+            list2=( "${(M)list[@]:#(#i)*${~matchstr[${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}]:-${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}}*}" )
+            [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+        }
+    } || {
+        list=( "${(uOn)list[@]/(#b)href=?(\/[^\/]##)(#c4,4)\/([^\/]##)*/${match[2]}}" )
     }
 
     REPLY="${list[1]}"
