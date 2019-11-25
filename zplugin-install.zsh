@@ -1093,11 +1093,35 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
 
     local url="https://github.com/$user/$plugin/releases/latest"
 
-    local -a list
+    local -A matchstr=(
+        "i386"    "(386|686)"
+        "i686"    "(386|686)"
+        "x86_64"  "(x86_64|amd64|intel)"
+        "amd64"   "(x86_64|amd64|intel)"
+        "aarch64" "aarch64"
+        "linux"   "(linux|linux-gnu)"
+        "darwin"  "(darwin|macos|mac-os|osx|os-x)"
+        "cygwin"  "(windows|cygwin)"
+        "windows" "(windows|cygwin)"
+    )
+
+    local -a list list2
     list=( ${(@f)"$( { -zplg-download-file-stdout $url || -zplg-download-file-stdout $url 1; } 2>/dev/null | \
                   command grep -o 'href=./'$user'/'$plugin'/releases/download/[^"]\+')"} )
 
-    list=( "${(uOn)list[@]/(#b)href=?(\/[^\/]##)(#c4,4)\/([^\/]##)*/${match[2]}}" )
+    list=( "${list[@]#href=?}" )
+    [[ -n "${ice[bpick]}" ]] && list=( "${(M)list[@]:#(#i)*/${~ice[bpick]}}" )
+
+    [[ ${#list} -gt 1 ]] && {
+        list2=( "${(M)list[@]:#(#i)*${~matchstr[$CPUTYPE]:-${CPUTYPE#(#i)(i|amd)}}*}" )
+        [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+    }
+
+    [[ ${#list} -gt 1 ]] && {
+        list2=( "${(M)list[@]:#(#i)*${~matchstr[${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}]:-${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}}*}" )
+        [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+    }
+
     REPLY="${list[1]}"
 }
 # }}}
