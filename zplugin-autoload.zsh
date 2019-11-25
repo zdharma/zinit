@@ -1381,7 +1381,7 @@ ZPLGM[EXTENDED_GLOB]=""
         local do_update=0 skip_pull=0
         if [[ -n "${ice[is_release]}" ]] {
             (( ${+functions[-zplg-setup-plugin-dir]} )) || builtin source ${ZPLGM[BIN_DIR]}"/zplugin-install.zsh"
-            -zplg-get-latest-gh-r-version "$user" "$plugin"
+            -zplg-get-latest-gh-r-version "$user" "$plugin" "${ice[ver]}"
             if [[ "${ice[is_release]}" = *$REPLY* ]] {
                 [[ "${ICE_OPTS[opt_-q,--quiet]}" != 1 ]] && \
                     print -- "\rBinary release already up to date (version: ${${+ice[ver]+${REPLY/(#b)(\/[^\/]##)(#c4,4)\/([^\/]##)*/${match[2]}}}:-$REPLY})"

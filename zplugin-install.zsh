@@ -935,13 +935,14 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
     -zplg-any-to-user-plugin "$1" "$2"
     local user="${reply[-2]}"
     local plugin="${reply[-1]}"
+    [[ -n $3 ]] && integer detailed=1 || integer detailed=0
 
-    local url="https://github.com/$user/$plugin/releases/${ice[ver]:-latest}"
+    local url="https://github.com/$user/$plugin/releases/${${${detailed#0}:+${ice[ver]}}:-latest}"
 
     local -a list
     list=( ${(@f)"$( { -zplg-download-file-stdout $url || -zplg-download-file-stdout $url 1; } 2>/dev/null | \
                   command grep -o 'href=./'$user'/'$plugin'/releases/download/[^"]\+')"} )
-    [[ -n ${ice[ver]} ]] && {
+    (( detailed )) && {
         local -A matchstr=(
         "i386"    "(386|686)"
         "i686"    "(386|686)"
