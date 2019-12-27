@@ -23,7 +23,7 @@ The project is also available as binary Github release. This distribution can be
 
 ```zsh
 zplugin ice from"gh-r" as"program" mv"direnv* -> direnv" \
-    './direnv hook zsh > zhook.zsh' atpull'%atclone' pick"direnv"
+    atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' pick"direnv" src"zhook.zsh"
 zplugin light direnv/direnv
 ```
 
@@ -32,5 +32,6 @@ zplugin light direnv/direnv
  - `atclone'…'`, `atpull'…'` – as in previous example,
  - `pick"direnv"` – as in previous example,
  - `as"program"` – as in previous example.
+ - `src"zhook.zsh"` – as in previous example.
 
 []( vim:set ft=markdown tw=80: )
