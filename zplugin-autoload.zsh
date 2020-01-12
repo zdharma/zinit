@@ -1359,8 +1359,8 @@ ZPLGM[EXTENDED_GLOB]=""
 # $2 - plugin spec (4 formats: user---plugin, user/plugin, user (+ plugin in $2), plugin)
 # $3 - plugin (only when $1 - i.e. user - given)
 -zplg-update-or-status() {
-    setopt localoptions extendedglob nokshglob noksharrays \
-            nullglob rmstarsilent warncreateglobal
+    emulate -LR zsh
+    setopt extendedglob nullglob warncreateglobal typesetsilent noshortloops
 
     local -a arr
 
@@ -1388,6 +1388,15 @@ ZPLGM[EXTENDED_GLOB]=""
     -zplg-compute-ice "$user${${user:#(%|/)*}:+/}$plugin" "pack$nf" \
         ice local_dir filename is_snippet || return 1
     [[ "${ice[teleid]:-$id_as}" = (#b)([^/]##)/(*) ]] && { user="${match[1]}"; plugin="${match[2]}"; } || { user=""; plugin="${ice[teleid]:-$id_as}"; }
+
+    -zplg-any-to-user-plugin ${ice[teleid]:-$id_as}
+    local -a arr
+    reply=( "${(@on)ZPLG_EXTS[(I)z-annex hook:preinit <->]}" )
+    for key in "${reply[@]}"; do
+        arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+        "${arr[5]}" plugin "${reply[-2]}" "${reply[-1]}" "$id_as" "${${${(M)user:#%}:+$plugin}:-${ZPLGM[PLUGINS_DIR]}/${id_as//\//---}}" preinit || \
+            return $(( 10 - $? ))
+    done
 
     # Check if repository has a remote set, if it is _local
     local repo="${ZPLGM[PLUGINS_DIR]}/${id_as//\//---}"
@@ -1417,8 +1426,8 @@ ZPLGM[EXTENDED_GLOB]=""
             if [[ "${ice[is_release]}" = *$REPLY* ]] {
                 [[ "${ICE_OPTS[opt_-q,--quiet]}" != 1 ]] && \
                     print -- "\rBinary release already up to date (version: ${REPLY/(#b)(\/[^\/]##)(#c4,4)\/([^\/]##)*/${match[2]}})"
-
-                (( ${+ice[run-atpull]} )) && { do_update=1; skip_pull=1; }
+                skip_pull=1
+                (( ${+ice[run-atpull]} )) && { do_update=1; }
             } else {
                 do_update=1
             }
@@ -1483,8 +1492,9 @@ ZPLGM[EXTENDED_GLOB]=""
               { log=( ${(@f)"$(<$local_dir/.zplugin_lstupd)"} ); } 2>/dev/null
               [[ ${#log} -gt 0 ]] && do_update=1 || \
                   {
+                      skip_pull=1
                       (( ${+ice[run-atpull]} )) && {
-                          do_update=1; skip_pull=1
+                          do_update=1
                           print -r -- "<mark>" >! "$local_dir/.zplugin_lstupd"
                       }
                   }
@@ -1515,8 +1525,13 @@ ZPLGM[EXTENDED_GLOB]=""
         }
 
         [[ -d "$local_dir/.git" ]] && \
-            (  builtin cd -q "$local_dir" # || return 1 - don't return, maybe it's some hook's logic
-               command git pull --recurse-submodules
+            (
+                builtin cd -q "$local_dir" # || return 1 - don't return, maybe it's some hook's logic
+                if (( ICE_OPTS[opt_-q,--quiet] )) {
+                    command git pull --recurse-submodules &> /dev/null
+                } else {
+                    command git pull --recurse-submodules | grep -v "Already up to date."
+                }
             )
 
         local -a log
@@ -1537,7 +1552,15 @@ ZPLGM[EXTENDED_GLOB]=""
                 local -a afr
                 ( builtin cd -q "$local_dir" || return 1
                   afr=( ${~from}(DN) )
-                  [[ ${#afr} -gt 0 ]] && { command mv -vf "${afr[1]}" "$to"; command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+                  [[ ${#afr} -gt 0 ]] && { 
+                      if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                          command mv -vf "${afr[1]}" "$to"
+                          command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null;
+                      } else {
+                          command mv -f "${afr[1]}" "$to"
+                          command mv -f "${afr[1]}".zwc "$to".zwc 2>/dev/null;
+                      }
+                  }
                 )
             fi
 
@@ -1550,7 +1573,15 @@ ZPLGM[EXTENDED_GLOB]=""
                 local -a afr
                 ( builtin cd -q "$local_dir" || return 1
                   afr=( ${~from}(DN) )
-                  [[ ${#afr} -gt 0 ]] && { command cp -vf "${afr[1]}" "$to"; command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+                  [[ ${#afr} -gt 0 ]] && {
+                      if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                          command cp -vf "${afr[1]}" "$to"
+                          command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                      } else {
+                          command cp -f "${afr[1]}" "$to"
+                          command cp -f "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                      }
+                  }
                 )
             fi
 
@@ -1589,11 +1620,18 @@ ZPLGM[EXTENDED_GLOB]=""
     done
 
     if [[ -n ${ZPLG_ICE[ps-on-update]} ]]; then
-        (( quiet )) || print -r "Running plugin's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
-        (
-            builtin cd -q "$local_dir"
-            eval "${ZPLG_ICE[ps-on-update]}"
-        )
+        if (( !ICE_OPTS[opt_-q,--quiet] )) {
+            print -r "Running plugin's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
+            (
+                builtin cd -q "$local_dir"
+                eval "${ZPLG_ICE[ps-on-update]}"
+            )
+        } else {
+            (
+                builtin cd -q "$local_dir"
+                eval "${ZPLG_ICE[ps-on-update]}" &> /dev/null
+            )
+        }
     fi
     ZPLG_ICE=()
 
@@ -2868,7 +2906,7 @@ EOF
         reset-prompt wrap-track reset sh \!sh bash \!bash ksh \!ksh csh
         \!csh aliases countdown ps-on-unload ps-on-update trigger-load
         light-mode is-snippet atdelete pack git verbose on-update-of
-        subscribe
+        subscribe param
         # Include all additional ices – after
         # stripping them from the possible: ''
         ${(@us.|.)${ZPLG_EXTS[ice-mods]//\'\'/}}

@@ -613,7 +613,7 @@ builtin setopt noaliases
 # "light-b" (i.e. the `trackbinds' mode) or "compdef").
 -zplg-shadow-off() {
     builtin setopt localoptions noerrreturn noerrexit extendedglob warncreateglobal \
-        typesetsilent noshortloops unset
+        typesetsilent noshortloops unset noaliases
     local mode="$1"
 
     # Disable shadowing only once
@@ -1653,7 +1653,7 @@ atdelete|git|verbose|param${~exts})(*)
 # or snippet) mentioned in the next command – for later use with e.g.
 # `zplugin update ...'
 -zplg-pack-ice() {
-    ZPLG_SICE[$1${1:+${2:+/}}$2]+="${(j: :)${(q-kv)ZPLG_ICE[@]}} "
+    ZPLG_SICE[$1${1:+${2:+/}}$2]+="${(j: :)${(qkv)ZPLG_ICE[@]}} "
     ZPLG_SICE[$1${1:+${2:+/}}$2]="${ZPLG_SICE[$1${1:+${2:+/}}$2]# }"
     return 0
 } # }}}

@@ -430,7 +430,15 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
               afr=( ${~from}(DN) )
-              [[ ${#afr} -gt 0 ]] && { command mv -vf "${afr[1]}" "$to"; command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+              [[ ${#afr} -gt 0 ]] && {
+                  if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                      command mv -vf "${afr[1]}" "$to"
+                      command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  } else {
+                      command mv -f "${afr[1]}" "$to"
+                      command mv -f "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  }
+              }
             )
         }
 
@@ -444,7 +452,15 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
               afr=( ${~from}(DN) )
-              [[ ${#afr} -gt 0 ]] && { command cp -vf "${afr[1]}" "$to"; command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+              [[ ${#afr} -gt 0 ]] && {
+                  if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                      command cp -vf "${afr[1]}" "$to"
+                      command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  } else {
+                      command cp -f "${afr[1]}" "$to"
+                      command cp -f "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  }
+              }
             )
         }
 
@@ -509,6 +525,7 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
     # is not empty and first is not "%" - then it's
     # just $1 in first case, or $1$2 in second case
     local id_as="$1${2:+${${${(M)1:#%}:+$2}:-/$2}}" reinstall="${3:-0}" quiet="${${4:+1}:-0}"
+    (( ICE_OPTS[opt_-q,--quiet] )) && quiet=1
 
     -zplg-any-to-user-plugin "$id_as" ""
     local user="${reply[-2]}"
@@ -954,8 +971,14 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             # Currently redundant, but theoretically it has its place
             [[ -f "$local_dir/$dirname/$filename" ]] && command rm -f "$local_dir/$dirname/$filename"
             command mkdir -p "$local_dir/$dirname"
-            print "Copying $filename..."
-            command cp -v "$url" "$local_dir/$dirname/$filename" || { print -r -- "${ZPLGM[col-error]}An error occured${ZPLGM[col-rst]}"; retval=1; }
+            if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                print -P "${ZPLGM[col-msg1]}Copying ${ZPLGM[col-obj]}$filename${ZPLGM[col-msg1]}...%f"
+                command cp -v "$url" "$local_dir/$dirname/$filename" || \
+                    { print -r -- "${ZPLGM[col-error]}An error occured${ZPLGM[col-rst]}"; retval=1; }
+            } else {
+                command cp "$url" "$local_dir/$dirname/$filename" || \
+                    { print -r -- "${ZPLGM[col-error]}An error occured${ZPLGM[col-rst]}"; retval=1; }
+            }
         }
 
         if [[ "${${:-$local_dir/$dirname}%%/##}" != "${ZPLGM[SNIPPETS_DIR]}" ]]; then
@@ -963,9 +986,10 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             local pfx="$local_dir/$dirname/._zplugin"
             -zplg-store-ices "$pfx" ZPLG_ICE "url_rsvd" "" "$save_url" "${+ZPLG_ICE[svn]}"
         else
-            print "${ZPLGM[col-error]}Warning${ZPLGM[col-rst]}: inconsistency #2 occurred - skipped storing ice-mods to"
-            print "disk, please report at https://github.com/zdharma/zplugin/issues"
-            print "providing the commands \`zplugin ice {...}; zplugin snippet {...}'"
+            print "${ZPLGM[col-error]}Warning${ZPLGM[col-rst]}: inconsistency #2 occurred" \
+                "- skipped storing ice-mods to" \
+                "disk, please report at https://github.com/zdharma/zplugin/issues" \
+                "providing the commands \`zplugin ice {...}; zplugin snippet {...}'"
         fi
 
         (( retval == 1 )) && { command rmdir "$local_dir/$dirname" 2>/dev/null; return $retval; }
@@ -979,11 +1003,18 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             done
 
             if [[ -n ${ZPLG_ICE[ps-on-update]} ]]; then
-                (( quiet )) || print -r "Running plugin's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
-                (
-                    builtin cd -q "$local_dir/$dirname";
-                    eval "${ZPLG_ICE[ps-on-update]}"
-                )
+                if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                    print -r "Running snippet's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
+                    (
+                        builtin cd -q "$local_dir/$dirname";
+                        eval "${ZPLG_ICE[ps-on-update]}"
+                    )
+                } else {
+                    (
+                        builtin cd -q "$local_dir/$dirname";
+                        eval "${ZPLG_ICE[ps-on-update]}" &> /dev/null
+                    )
+                }
             fi
             return 0;
         }
@@ -1000,7 +1031,15 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_dir/$dirname"; } || return 1
               afr=( ${~from}(DN) )
-              [[ ${#afr} -gt 0 ]] && { command mv -vf "${afr[1]}" "$to"; command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+              [[ ${#afr} -gt 0 ]] && {
+                  if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                      command mv -vf "${afr[1]}" "$to"
+                      command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  } else {
+                      command mv -f "${afr[1]}" "$to"
+                      command mv -f "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  }
+              }
             )
         fi
 
@@ -1014,7 +1053,15 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_dir/$dirname"; } || return 1
               afr=( ${~from}(DN) )
-              [[ ${#afr} -gt 0 ]] && { command cp -vf "${afr[1]}" "$to"; command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+              [[ ${#afr} -gt 0 ]] && {
+                  if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                      command cp -vf "${afr[1]}" "$to"
+                      command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  } else {
+                      command cp -f "${afr[1]}" "$to"
+                      command cp -f "${afr[1]}".zwc "$to".zwc 2>/dev/null
+                  }
+              }
             )
         fi
 
@@ -1069,7 +1116,9 @@ builtin source ${ZPLGM[BIN_DIR]}"/zplugin-side.zsh"
             done
 
             if [[ -n ${ZPLG_ICE[ps-on-update]} ]]; then
-                (( quiet )) || print -r "Running plugin's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
+                if (( !ICE_OPTS[opt_-q,--quiet] )) {
+                    print -r "Running snippet's provided update code: ${ZPLGM[col-info]}${ZPLG_ICE[ps-on-update][1,50]}${ZPLG_ICE[ps-on-update][51]:+…}${ZPLGM[col-rst]}"
+                }
                 eval "${ZPLG_ICE[ps-on-update]}"
             fi
         }
@@ -1157,8 +1206,9 @@ zpextract() {
 
     -zplg-extract-wrapper() {
         local file="$1" fun="$2" retval
-        print "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-msg1]} Unpacking the files from:" \
-            "\`${ZPLGM[col-obj]}$file${ZPLGM[col-msg1]}'...${ZPLGM[col-rst]}"
+        (( !ICE_OPTS[opt_-q,--quiet] )) && \
+            print "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-msg1]} Unpacking the files from:" \
+                "\`${ZPLGM[col-obj]}$file${ZPLGM[col-msg1]}'...${ZPLGM[col-rst]}"
         $fun; retval=$?
         (( retval == 0 )) && {
             local -a files
@@ -1251,7 +1301,9 @@ zpextract() {
     } else {
         print -r -- "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-rst]}" \
             "${ZPLGM[col-error]}WARNING: ${ZPLGM[col-msg1]}didn't recognize the archive" \
-            "type (no extraction has been done).${ZPLGM[col-rst]}"
+            "type of \`${ZPLGM[col-obj]}$file${ZPLGM[col-msg1]}'" \
+            "${ext:+${ZPLGM[col-obj2]}/ $ext${ZPLGM[col-msg1]} }"\
+"(no extraction has been done).${ZPLGM[col-rst]}"
     }
     unfunction -- -zplg-extract-wrapper
 
@@ -1265,20 +1317,22 @@ zpextract() {
 
     [[ ${#execs} -gt 0 ]] && {
         command chmod a+x "${execs[@]}"
-        if (( ${#execs} == 1 )); then
-            print -r -- "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-rst]}" \
-                "Successfully extracted and assigned +x chmod to the file:" \
-                "\`${ZPLGM[col-obj]}${execs[1]}${ZPLGM[col-rst]}'."
-        else
-            local sep="${ZPLGM[col-rst]},${ZPLGM[col-obj]} "
-            print -r -- "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-rst]} Successfully" \
-                "extracted and marked executable the appropriate files" \
-                "(${ZPLGM[col-obj]}${(pj:$sep:)${execs[@]:t}}${ZPLGM[col-rst]}) contained" \
-                "in \`${ZPLGM[col-file]}$file${ZPLGM[col-rst]}'."
-        fi
+        (( !ICE_OPTS[opt_-q,--quiet] )) && \
+            if (( ${#execs} == 1 )); then
+                    print -r -- "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-rst]}" \
+                        "Successfully extracted and assigned +x chmod to the file:" \
+                        "\`${ZPLGM[col-obj]}${execs[1]}${ZPLGM[col-rst]}'."
+            else
+                local sep="${ZPLGM[col-rst]},${ZPLGM[col-obj]} "
+                print -r -- "${ZPLGM[col-pre]}zpextract:${ZPLGM[col-rst]} Successfully" \
+                    "extracted and marked executable the appropriate files" \
+                    "(${ZPLGM[col-obj]}${(pj:$sep:)${execs[@]:t}}${ZPLGM[col-rst]}) contained" \
+                    "in \`${ZPLGM[col-file]}$file${ZPLGM[col-rst]}'."
+            fi
     }
 
     (( move )) && {
+        # TODO: mkdir .tmp231ABC
         command mv -f *~(._zplugin|.git|._backup)(DN[1]) .tmp231ABC
         command mv -f **/*~(*/*/*|^*/*|._zplugin(|/*)|.git(|/*)|._backup(|/*))(DN) .
         command rmdir .tmp231ABC
