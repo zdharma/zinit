@@ -1,2 +1,0 @@
-atclone builtin\ echo\ \>!\ test_file atpull %atclone 
-psprint/zsh-select

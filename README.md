@@ -1036,9 +1036,9 @@ Do you need help or wish to get in touch with other Zinit users?
 
 - Visit our subreddit [r/zinit](https://www.reddit.com/r/zinit/).
 
-- Chat with us in our IRC channel. Connect to [chat.freenode.net:6697](ircs://chat.freenode.net:6697/%23zinit) (SSL) or [chat.freenode.net:6667](irc://chat.freenode.net:6667/%23zinit) and join #zinit. Following is a quick access via Webchat [![IRC](https://kiwiirc.com/buttons/chat.freenode.net/zinit.png)](https://kiwiirc.com/client/chat.freenode.net:+6697/#zinit) [![Join the chat at https://gitter.im/zdharma/zinit](https://badges.gitter.im/zdharma/zinit.svg)](https://gitter.im/zdharma/zinit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+- Chat with us in our IRC channel. Connect to [chat.freenode.net:6697](ircs://chat.freenode.net:6697/%23zinit) (SSL) or [chat.freenode.net:6667](irc://chat.freenode.net:6667/%23zinit) and join #zinit. Following is a quick access via Webchat [![IRC](https://kiwiirc.com/buttons/chat.freenode.net/zinit.png)](https://kiwiirc.com/client/chat.freenode.net:+6697/#zinit)
 
-- Or via Gitter [![Chat at https://gitter.im/zinit/Lobby][lobby-badge]][lobby-link]
+- Or via Gitter [![Join the chat at https://gitter.im/zdharma/zinit][lobby-badge]][lobby-link]
 
 [status-badge]: https://travis-ci.org/zdharma/zinit.svg?branch=master
 [status-link]: https://travis-ci.org/zdharma/zinit
@@ -1047,8 +1047,8 @@ Do you need help or wish to get in touch with other Zinit users?
 [ver-badge]: https://img.shields.io/github/tag/zdharma/zinit.svg
 [ver-link]: https://github.com/zdharma/zinit/releases
 [act-badge]: https://img.shields.io/github/commit-activity/y/zdharma/zinit.svg
-[lobby-badge]: https://badges.gitter.im/zinit/Lobby.svg
-[lobby-link]: https://gitter.im/zinit/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[lobby-badge]: https://badges.gitter.im/zdharma/zinit.svg
+[lobby-link]: https://gitter.im/zdharma/zinit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 <!-- vim:tw=87
 -->

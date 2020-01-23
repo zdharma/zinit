@@ -24,12 +24,22 @@ git -C out checkout "$TARGET_BRANCH" || git -C out checkout --orphan "$TARGET_BR
 LIST_ORIGINAL=( out/* )
 
 # Remove existing contents
+mv -v out/site site_out
+mv -v out/wiki wiki_out
+mv -v out/highlight highlight_out
 mv -v out/.git .git_out
 mv -v out/index.html .
+mv -v out/.gitignore .
+mv -v out/Makefile Makefile_out
 rm -rf out
 mkdir out
-mv .git_out out/.git
-mv index.html out
+mv -v site_out out/site
+mv -v wiki_out out/wiki
+mv -v highlight_out out/highlight
+mv -v .git_out out/.git
+mv -v index.html out
+mv -v .gitignore out
+mv -v Makefile_out out/Makefile
 touch out/.nojekyll
 
 # Copy the PDFs (built earlier by .travis.yml / make)
@@ -76,3 +86,5 @@ echo
 git push "$SSH_REPO" "$TARGET_BRANCH"
 
 rm -f ../share/deploy_key
+
+mail -s "The Zplugin deploy done on $( date '+%m/%d/%Y' )" sgniazdowski@gmail.com,psprint@zdharma.org <<< 'The deploy has been done'

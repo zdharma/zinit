@@ -1,7 +1,7 @@
 language: ruby
-dist: trusty
+dist: bionic
 rvm:
-  - 2.2
+  - 2.6
 install: gem install asciidoctor-pdf --pre
 
 git:
@@ -13,6 +13,7 @@ addons:
   apt:
     packages:
     - zsh
+    - mailutils
 
 env:
   global:
@@ -20,23 +21,26 @@ env:
   - COMMIT_AUTHOR_EMAIL: "psprint@zdharma.org"
 
 before_script:
+- sudo apt-get install -y zsh mailutils
 - zsh --version
 - >-
     zsh -c 'print -rl -- "ZSH_VERSION: $ZSH_VERSION" "ZSH_PATCHLEVEL: $ZSH_PATCHLEVEL" "OSTYPE: $OSTYPE" "CPUTYPE: $CPUTYPE" "MACHTYPE: $MACHTYPE"'
 script:
+- git fetch --depth=1 origin tests:tests
+- git worktree add test tests
 - make
-- make test VERBOSE=1
-- make testB VERBOSE=1
-- make testC VERBOSE=1
-- make testD VERBOSE=1
-- make testE VERBOSE=1
 - make -C zsdoc pdf
 - share/deploy_doc.sh
+- make -C test test VERBOSE=1
+- make -C test testB VERBOSE=1
+- make -C test testC VERBOSE=1
+- make -C test testD VERBOSE=1
+- make -C test testE VERBOSE=1
 
 notifications:
   irc:
     channels:
       - "chat.freenode.net#zplugin"
     on_success: change # default: always
-    on_failure: always # default: always
-    skip_join: false
+    on_failure: change # default: always
+    skip_join: true
