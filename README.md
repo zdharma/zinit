@@ -1,4 +1,4 @@
-[![paypal](https://img.shields.io/badge/-Donate-yellow.svg?longCache=true&style=for-the-badge)](https://www.paypal.me/ZdharmaInitiative)
+[![Financial Contributors on Open Collective](https://opencollective.com/zplugin/all/badge.svg?label=financial+contributors)](https://opencollective.com/zplugin) [![paypal](https://img.shields.io/badge/-Donate-yellow.svg?longCache=true&style=for-the-badge)](https://www.paypal.me/ZdharmaInitiative)
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=D54B3S7C6HGME)
 [![patreon](https://img.shields.io/badge/-Patreon-orange.svg?longCache=true&style=for-the-badge)](https://www.patreon.com/psprint)
 
@@ -985,3 +985,33 @@ Do you need help or wish to get in touch with other Zinit users?
 
 <!-- vim:tw=87
 -->
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/zdharma/zplugin/graphs/contributors"><img src="https://opencollective.com/zplugin/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/zplugin/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/zplugin"><img src="https://opencollective.com/zplugin/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/zplugin/contribute)]
+
+<a href="https://opencollective.com/zplugin/organization/0/website"><img src="https://opencollective.com/zplugin/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/1/website"><img src="https://opencollective.com/zplugin/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/2/website"><img src="https://opencollective.com/zplugin/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/3/website"><img src="https://opencollective.com/zplugin/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/4/website"><img src="https://opencollective.com/zplugin/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/5/website"><img src="https://opencollective.com/zplugin/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/6/website"><img src="https://opencollective.com/zplugin/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/7/website"><img src="https://opencollective.com/zplugin/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/8/website"><img src="https://opencollective.com/zplugin/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/zplugin/organization/9/website"><img src="https://opencollective.com/zplugin/organization/9/avatar.svg"></a>
