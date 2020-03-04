@@ -102,7 +102,7 @@ zinit ice wait"0c" lucid reset \
             '/DIR/c\DIR 38;5;63;1' LS_COLORS; \
             \${P}dircolors -b LS_COLORS > c.zsh" \
     atpull'%atclone' pick"c.zsh" nocompile'!' \
-    atload'zstyle ":completion:*" list-colors “${(s.:.)LS_COLORS}”'
+    atload'zstyle ":completion:*" list-colors "${(s.:.)LS_COLORS}"'
 zinit light trapd00r/LS_COLORS
 
 # revolver
