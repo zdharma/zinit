@@ -203,7 +203,6 @@ builtin setopt noaliases
 :zinit-shadow-autoload () {
     emulate -LR zsh
     builtin setopt extendedglob warncreateglobal typesetsilent noshortloops
-
     local -a opts
     local func
 
