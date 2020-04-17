@@ -2079,7 +2079,9 @@ dunload|dreport|dclear|compile|uncompile|compiled|cdlist|cdreplay|cdclear|srv|re
 env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#z-annex subcommand:}"}}) || $1 = (load|light|snippet) ]] && \
     {
         integer error
+        +zinit-message "[obj] --- [file]$1[obj] / [pre]${+ZINIT_ICE[wait]}/${ZINIT_ICE[wait]}[obj] / [msg2][pre]${+ZINIT_ICE[cloneonly]}/${ZINIT_ICE[cloneonly]}[obj] --- [rst]" >>! /tmp/log.txt
         if [[ $1 = (load|light|snippet) ]] {
+            +zinit-message "[obj]1[rst]" >>! /tmp/log.txt
             integer  __is_snippet
             # Classic syntax -> simulate a call through the for-syntax
             () {
@@ -2100,6 +2102,7 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
                return 1
             }
         } else {
+            +zinit-message "[obj]2[rst]" >>! /tmp/log.txt
             .zinit-ice "$@"
             integer retval=$?
             local last_ice=${@[retval]}
@@ -2116,20 +2119,24 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
         }
         integer __retval __had_wait
         if (( $# )) {
+            +zinit-message "[obj] --- [error]#[obj] --- [file]$1[obj] / [pre]${+ZINIT_ICE[wait]}/${ZINIT_ICE[wait]}[obj] / [msg2][pre]${+ZINIT_ICE[cloneonly]}/${ZINIT_ICE[cloneonly]}[obj] --- [rst]" >>! /tmp/log.txt
             local -a __ices
             __ices=( "${(kv)ZINIT_ICES[@]}" )
             ZINIT_ICES=()
             while (( $# )) {
+                +zinit-message "[obj]4[rst]" >>! /tmp/log.txt
                 .zinit-ice "$@"
                 integer retval=$?
                 local last_ice=${@[retval]}
                 shift $retval
                 [[ -z ${ZINIT_ICES[subscribe]} ]] && unset 'ZINIT_ICES[subscribe]'
                 if [[ -n $1 ]] {
+                    +zinit-message "[obj]5[rst]" >>! /tmp/log.txt
                     ZINIT_ICE=( "${__ices[@]}" "${(kv)ZINIT_ICES[@]}" )
                     ZINIT_ICES=()
 
                     (( ${+ZINIT_ICE[pack]} )) && {
+                        +zinit-message "[obj]6[rst]" >>! /tmp/log.txt
                         __had_wait=${+ZINIT_ICE[wait]}
                         .zinit-load-ices "${1#@}"
                         [[ -z ${ZINIT_ICE[wait]} && $__had_wait == 0 ]] && \
@@ -2138,16 +2145,20 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
 
                     [[ ${ZINIT_ICE[id-as]} = (auto|) && ${+ZINIT_ICE[id-as]} == 1 ]] && ZINIT_ICE[id-as]="${1:t}"
 
+                    +zinit-message "[obj]7[rst]" >>! /tmp/log.txt
                     integer  __is_snippet=${${(M)__is_snippet:#-1}:-0}
                     () {
                         setopt localoptions extendedglob
                         if [[ $__is_snippet -ge 0 && ( -n ${ZINIT_ICE[is-snippet]+1} || ${1#@} = ((#i)(http(s|)|ftp(s|)):/|(${(~kj.|.)ZINIT_1MAP}))* ) ]] {
+                            +zinit-message "[obj]8[rst]" >>! /tmp/log.txt
                             __is_snippet=1
                         }
                     } "$@"
 
+                    +zinit-message "[obj]9[rst]" >>! /tmp/log.txt
                     integer __action_load=0 __turbo=0
                     if [[ -n ${(M)${+ZINIT_ICE[wait]}:#1}${ZINIT_ICE[load]}${ZINIT_ICE[unload]}${ZINIT_ICE[service]}${ZINIT_ICE[subscribe]} ]] {
+                        +zinit-message "[obj]10[rst]" >>! /tmp/log.txt
                         __turbo=1
                     }
 
@@ -2156,6 +2167,7 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
                               ${ZINIT_ICE[wait]} = (\!|)(<->(a|b|c|)|) )
                        ]] && (( !ZINIT[OPTIMIZE_OUT_DISK_ACCESSES]
                     )) {
+                        +zinit-message "[obj]11[rst]" >>! /tmp/log.txt
                         if (( __is_snippet > 0 )) {
                             .zinit-get-object-path snippet "${${1#@}%%(///|//|/)}"
                         } else {
@@ -2164,12 +2176,15 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
                         (( $? )) && { __action_load=1; }
                         local __object_path="${reply[-3]}"
                     } elif (( ! __turbo )) {
+                        +zinit-message "[obj]12[rst]" >>! /tmp/log.txt
                         __action_load=1
                         reply=( 1 )
                     } else {
+                        +zinit-message "[obj]13[rst]" >>! /tmp/log.txt
                         reply=( 1 )
                     }
 
+                    +zinit-message "[obj]14[rst]" >>! /tmp/log.txt
                     if [[ ${reply[-1]} -eq 1 && -n ${ZINIT_ICE[trigger-load]} ]] {
                         () {
                             setopt localoptions extendedglob
@@ -2198,7 +2213,9 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
                     (( ${+ZINIT_ICE[has]} )) && { (( ${+commands[${ZINIT_ICE[has]}]} )) || { (( $# )) && shift; continue; }; }
 
                     ZINIT_ICE[wait]="${${(M)${+ZINIT_ICE[wait]}:#1}:+${(M)ZINIT_ICE[wait]#!}${${ZINIT_ICE[wait]#!}:-0}}"
+                    +zinit-message "[obj]15[rst]" >>! /tmp/log.txt
                     if (( __turbo )) {
+                        +zinit-message "[obj]16[rst]" >>! /tmp/log.txt
                         ZINIT_ICE[wait]="${ZINIT_ICE[wait]:-${ZINIT_ICE[service]:+0}}"
                         if (( __is_snippet > 0 )); then
                             ZINIT_SICE[${${1#@}%%(///|//|/)}]=
@@ -2214,6 +2231,7 @@ env-whitelist|bindkeys|module|add-fpath|fpath|run${reply:+|${(~j:|:)"${reply[@]#
                         __retval+=$?
                     }
                     if (( __action_load )) {
+                        +zinit-message "[obj]17[rst]" >>! /tmp/log.txt
                         if (( __turbo )) {
                             ZINIT_ICE[cloneonly]=""
                         }
