@@ -299,6 +299,10 @@ builtin source "${ZINIT[BIN_DIR]}/zinit-side.zsh" || { print -P "${ZINIT[col-err
     }
     local_path=$reply[-3]
 
+    if [[ $OSTYPE == cygwin* ]]; then
+      local_path=`cygpath -am $local_path`
+    fi
+
     local -A sites
     sites=(
         github    github.com
