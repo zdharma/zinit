@@ -419,7 +419,9 @@ builtin source ${ZINIT[BIN_DIR]}"/zinit-side.zsh"
             esac
 
             if [[ -n ${ZINIT_ICE[ver]} ]] {
-                command git -C "$local_path" checkout "${ZINIT_ICE[ver]}"
+                local cur_path="$PWD"
+                cd "$local_path" && command git checkout "${ZINIT_ICE[ver]}"
+                cd "$cur_path"
             }
         }
 
