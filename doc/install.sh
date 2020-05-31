@@ -67,6 +67,9 @@ RCUPDATE=1
 if egrep '(zinit|zplugin)\.zsh' "$THE_ZDOTDIR/.zshrc" >/dev/null 2>&1; then
     echo "[34m▓▒░[0m .zshrc already contains \`zinit …' commands – not making changes."
     RCUPDATE=0
+elif [[ "${SKIP_RCUPDATE:-false}" == "true" ]] ; then
+    echo "[34m▓▒░[0m requested not to make changes to .zshrc – not making changes."
+    RCUPDATE=0
 fi
 
 if [ $RCUPDATE -eq 1 ]; then
