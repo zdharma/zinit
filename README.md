@@ -708,7 +708,7 @@ read it to get the most out of Zinit.
 The easiest way to install Zinit is to execute:
 
 ```zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+sh -c "$(curl -fsSL https://git.io/zinit_install)"
 ```
 
 This will install Zinit in `~/.zinit/bin`. `.zshrc` will be updated with three
