@@ -1238,7 +1238,7 @@ To install just the binary Zinit module **standalone** (Zinit is not needed, the
 other plugin manager), execute:
 
 ```zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/mod-install.sh)"
+sh -c "$(curl -fsSL https://git.io/zinit_mod_install)"
 ```
 
 This script will display what to add to `~/.zshrc` (2 lines) and show usage instructions.
