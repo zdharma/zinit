@@ -2628,7 +2628,7 @@ ZINIT[EXTENDED_GLOB]=""
 # $2 - plugin (only when $1 - i.e. user - given)
 .zinit-cd() {
     builtin emulate -LR zsh
-    builtin setopt extendedglob warncreateglobal typesetsilent rcquotes
+    builtin setopt extendedglob warncreateglobal typesetsilent rcquotes pushd_silent
 
     .zinit-get-path "$1" "$2" && {
         if [[ -e $REPLY ]]; then
@@ -3300,7 +3300,7 @@ EOF
     ( builtin cd -q "${ZINIT[BIN_DIR]}"/zmodules
       +zinit-message "{pname}== Building module zdharma/zplugin, running: make clean, then ./configure and then make =={rst}"
       +zinit-message "{pname}== The module sources are located at: "${ZINIT[BIN_DIR]}"/zmodules =={rst}"
-      if [[ -f Makefile ]] { 
+      if [[ -f Makefile ]] {
           if [[ "$1" = "--clean" ]] {
               noglob +zinit-message {p}-- make distclean --{rst}
               make distclean
