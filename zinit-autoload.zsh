@@ -2089,7 +2089,7 @@ ZINIT[EXTENDED_GLOB]=""
     +zinit-message -n "Snippets loaded: "
     local sni
     for sni in ${(onv)ZINIT_SNIPPETS[@]}; do
-        +zinit-message -n "{url}$sni{rst}, "
+        +zinit-message -n "{url}${sni% <[^>]#>}{rst} ${(M)sni%<[^>]##>}, "
     done
     [[ -z $sni ]] && builtin print -n " "
     builtin print '\b\b  '
