@@ -1577,7 +1577,7 @@ ZINIT[EXTENDED_GLOB]=""
             }
         }
 
-        if (( ! is_release )) && git -C $repo show-ref --verify --quiet refs/heads/main; then
+        if [[ -d $repo/.git ]] && git -C $repo show-ref --verify --quiet refs/heads/main; then
             local main_branch=main
         else
             local main_branch=master
