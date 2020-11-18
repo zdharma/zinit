@@ -2043,7 +2043,7 @@ ZINIT[EXTENDED_GLOB]=""
     } elif (( counter == 1 && !OPTS[opt_-q,--quiet] )) {
         +zinit-message "{obj}Spawning the next{file}" \
             "${OPTS[value]}{obj} concurrent update jobs" \
-            "({msg2}%F{191}${tpe}{obj}){…}{rst}"
+            "({msg2}${tpe}{obj}){…}{rst}"
     }
 }
 # ]]]
