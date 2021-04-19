@@ -37,6 +37,7 @@
   - [Non-GitHub (Local) Plugins](#non-github-local-plugins)
   - [Extending Git](#extending-git)
   - [Preinstalling Plugins](#preinstalling-plugins)
+- [Uninstall Zinit](#uninstall-zinit)
 - [Getting Help and Community](#getting-help-and-community)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -1340,6 +1341,14 @@ zinit as"null" wait"1" lucid for \
 ```
 
 Target directory for installed files is `$ZPFX` (`~/.zinit/polaris` by default).
+
+# Uninstall Zinit
+
+To uninstall Zinit, simply run the following and remove any zinit related configuration in your `.zshrc`.
+
+```sh
+rm -rf $ZINIT[HOME_DIR]
+```
 
 # Getting Help and Community
 
