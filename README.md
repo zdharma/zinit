@@ -15,6 +15,7 @@
 - [Installation](#installation)
   - [Option 1 - Automatic Installation (Recommended)](#option-1---automatic-installation-recommended)
   - [Option 2 - Manual Installation](#option-2---manual-installation)
+- [Uninstalling](#uninstalling)
 - [Usage](#usage)
   - [Introduction](#introduction)
   - [Example Usage](#example-usage)
@@ -742,6 +743,12 @@ Various paths can be customized, see section [Customizing Paths](#customizing-pa
 
 After installing and reloading the shell compile Zinit with `zinit self-update`.
 
+# Uninstalling
+	
+	`$ZINIT[HOME_DIR]` and then delete everything in that directory (specific instructions are not provided to allow you to carefully think about what you are doing!) 
+	Then remove any `zinit` configuration which may exist in your `.zshrc` file. (Usually located in `~/.zshrc`)
+	
+	
 # Usage
 
 ## Introduction
