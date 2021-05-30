@@ -717,6 +717,9 @@ lines of code that will be added to the bottom. The lines will be sourcing
 `zinit.zsh` and setting up completion for command `zinit`. After installing and
 reloading the shell compile Zinit with `zinit self-update`.
 
+NOTE: If you would like to skeep the process of updating your zshrc when installing,
+run `SKIP_RCUPDATE=anyvalue` before 
+
 ## Option 2 - Manual Installation
 
 To manually install Zinit clone the repo to e.g. `~/.zinit/bin`:

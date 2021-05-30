@@ -64,14 +64,17 @@ fi
 #
 THE_ZDOTDIR="${ZDOTDIR:-$HOME}"
 RCUPDATE=1
-if egrep '(zinit|zplugin)\.zsh' "$THE_ZDOTDIR/.zshrc" >/dev/null 2>&1; then
+if [ -z "${SKIP_RCUPDATE:+x}" ] ; then
+    echo "[34m▓▒░[0m requested not to make changes to .zshrc – not making changes."
+    RCUPDATE=0
+elif grep -e '(zinit|zplugin)\.zsh' "$THE_ZDOTDIR/.zshrc" >/dev/null 2>&1; then
     echo "[34m▓▒░[0m .zshrc already contains \`zinit …' commands – not making changes."
     RCUPDATE=0
 fi
 
 if [ $RCUPDATE -eq 1 ]; then
     echo "[34m▓▒░[0m Updating $THE_ZDOTDIR/.zshrc (10 lines of code, at the bottom)"
-    ZINIT_HOME="$(echo $ZINIT_HOME | sed "s|$HOME|\$HOME|")"
+    ZINIT_HOME="$(echo "$ZINIT_HOME" | sed "s|$HOME|\$HOME|")"
     command cat <<-EOF >> "$THE_ZDOTDIR/.zshrc"
 
 ### Added by Zinit's installer
