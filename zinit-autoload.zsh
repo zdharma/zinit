@@ -2668,7 +2668,7 @@ ZINIT[EXTENDED_GLOB]=""
 
     .zinit-get-path "$1" "$2" && {
         if [[ -e $REPLY ]]; then
-            builtin pushd $REPLY
+            builtin pushd -q $REPLY
         else
             +zinit-message "No such plugin or snippet"
             return 1
@@ -2795,7 +2795,7 @@ builtin print -Pr \"\$ZINIT[col-obj]Done (with the exit code: \$_retval).%f%b\""
     # Make the ices available for the hooks.
     local -A ICE
     ICE=( "${(kv)ICE2[@]}" )
-    
+
     if (( is_snippet )); then
         if [[ "${+ICE2[svn]}" = "1" ]] {
             if [[ -e "$local_dir" ]]
@@ -2918,6 +2918,7 @@ builtin print -Pr \"\$ZINIT[col-obj]Done (with the exit code: \$_retval).%f%b\""
         fi
         popd >/dev/null
     done
+
 } # ]]]
 # FUNCTION: .zinit-create [[[
 # Creates a plugin, also on Github (if not "_local/name" plugin).
@@ -3083,7 +3084,10 @@ EOF
     [[ "$TERM" = xterm* || "$TERM" = "screen" ]] && has_256_colors=1
 
     {
-        if (( ${+commands[pygmentize]} )); then
+        if (( ${+commands[bat]} )); then
+            builtin print "Glancing with ${ZINIT[col-info]}bat${ZINIT[col-rst]}"
+            bat --color=always -l bash -P "$fname"
+        elif (( ${+commands[pygmentize]} )); then
             builtin print "Glancing with ${ZINIT[col-info]}pygmentize${ZINIT[col-rst]}"
             pygmentize -l bash -g "$fname"
         elif (( ${+commands[highlight]} )); then
@@ -3205,16 +3209,22 @@ EOF
 } # ]]]
 # FUNCTION: .zinit-ls [[[
 .zinit-ls() {
-    (( ${+commands[tree]} )) || {
+    local cmd
+    if (( ${+commands[exa]} )); then
+        cmd='exa'
+    elif (( ${+commands[tree]} )); then
+        cmd='tree'
+    else
         builtin print "${ZINIT[col-error]}No \`tree' program, it is required by the subcommand \`ls\'${ZINIT[col-rst]}"
         builtin print "Download from: http://mama.indstate.edu/users/ice/tree/"
         builtin print "It is also available probably in all distributions and Homebrew, as package \`tree'"
-    }
+    fi
     (
         setopt localoptions extendedglob nokshglob noksharrays
         builtin cd -q "${ZINIT[SNIPPETS_DIR]}"
         local -a list
-        list=( "${(f@)"$(LANG=en_US.utf-8 tree -L 3 --charset utf-8)"}" )
+        [[ "$cmd" == 'exa' ]] && list=( "${(f@)"$(LANG=en_US.utf-8 command exa -TL 3 --color=always --icons)"}" )
+        [[ "$cmd" == 'tree' ]] && list=( "${(f@)"$(LANG=en_US.utf-8 tree -L 3 --charset utf-8)"}" )
         # Oh-My-Zsh single file
         list=( "${list[@]//(#b)(https--github.com--(ohmyzsh|robbyrussel)l--oh-my-zsh--raw--master(--)(#c0,1)(*))/$ZINIT[col-info]Oh-My-Zsh$ZINIT[col-error]${match[2]/--//}$ZINIT[col-pname]${match[3]//--/$ZINIT[col-error]/$ZINIT[col-pname]} $ZINIT[col-info](single-file)$ZINIT[col-rst] ${match[1]}}" )
         # Oh-My-Zsh SVN
