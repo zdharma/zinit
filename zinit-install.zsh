@@ -1448,7 +1448,6 @@ builtin source "${ZINIT[BIN_DIR]}/zinit-side.zsh" || { builtin print -P "${ZINIT
     init_list=( ${(@f)"$( { .zinit-download-file-stdout $url || .zinit-download-file-stdout $url 1; } 2>/dev/null | \
                       command grep -o 'href=./'$user'/'$plugin'/releases/download/[^"]\+')"} )
     init_list=( ${init_list[@]#href=?} )
-
     local -a list2 bpicks
     bpicks=( ${(s.;.)ICE[bpick]} )
     [[ -z $bpicks ]] && bpicks=( "" )
@@ -1758,7 +1757,14 @@ ziextract() {
         }
         unfunction -- →zinit-extract →zinit-check
     } else {
+        case "${${ext:+.$ext}:-$file}" in
+        ((#i)*.jar)
+          :
+        ;;
+        *)
         integer warning=1
+        ;;
+        esac
     }
     unfunction -- .zinit-extract-wrapper
 
