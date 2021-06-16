@@ -341,6 +341,10 @@ builtin source "${ZINIT[BIN_DIR]}/zinit-side.zsh" || { builtin print -P "${ZINIT
     trap "rmdir ${(qqq)local_path}/._zinit ${(qqq)local_path} 2>/dev/null" EXIT
     trap "rmdir ${(qqq)local_path}/._zinit ${(qqq)local_path} 2>/dev/null; return 1" INT TERM QUIT HUP
 
+    if [[ $OSTYPE == cygwin* ]]; then
+      local_path=`cygpath -am $local_path`
+    fi
+
     local -A sites
     sites=(
         github    github.com
