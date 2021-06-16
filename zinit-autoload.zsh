@@ -2664,7 +2664,7 @@ ZINIT[EXTENDED_GLOB]=""
 # $2 - plugin (only when $1 - i.e. user - given)
 .zinit-cd() {
     builtin emulate -LR zsh
-    builtin setopt extendedglob warncreateglobal typesetsilent rcquotes
+    builtin setopt extendedglob warncreateglobal typesetsilent rcquotes pushd_silent
 
     .zinit-get-path "$1" "$2" && {
         if [[ -e $REPLY ]]; then
